@@ -1,134 +1,58 @@
 "use client";
-
-import { motion, useScroll, useTransform } from "framer-motion";
-import { useRef } from "react";
-
+import { useAtelier, setAtelier, seekChapterItem } from "@/lib/atelier-state";
 export default function ScentMemorySection() {
-	const sectionRef = useRef<HTMLElement>(null);
-
-	const { scrollYProgress } = useScroll({
-		target: sectionRef,
-		offset: ["start end", "end start"],
-	});
-
-	// Statement 01 — enters, stays readable, then leaves.
-	const seenOpacity = useTransform(
-		scrollYProgress,
-		[0.08, 0.2, 0.38, 0.46],
-		[0, 1, 1, 0],
-	);
-
-	const seenY = useTransform(scrollYProgress, [0.08, 0.2, 0.46], [45, 0, -35]);
-
-	// Statement 02 — gets more time on screen.
-	const rememberedOpacity = useTransform(
-		scrollYProgress,
-		[0.4, 0.5, 0.66, 0.74],
-		[0, 1, 1, 0],
-	);
-
-	const rememberedY = useTransform(
-		scrollYProgress,
-		[0.4, 0.5, 0.74],
-		[45, 0, -35],
-	);
-
-	// Final statement — stays visible until the section ends.
-	const differenceOpacity = useTransform(
-		scrollYProgress,
-		[0.62, 0.72, 1],
-		[0, 1, 1],
-	);
-
-	const differenceY = useTransform(scrollYProgress, [0.62, 0.72], [40, 0]);
-
-	return (
-		<section
-			ref={sectionRef}
-			className="relative min-h-[200vh] bg-perfume-bg text-perfume-text"
-		>
-			<div className="sticky top-0 flex min-h-screen items-center overflow-hidden px-6 py-24 md:px-12">
-				<div className="mx-auto w-full max-w-350">
-					<div className="relative min-h-130 md:min-h-150">
-						{/* SOME DIGITAL EXPERIENCES / ARE SEEN */}
-						<motion.div
-							style={{
-								opacity: seenOpacity,
-								y: seenY,
-							}}
-							className="absolute inset-0 flex flex-col justify-center"
-						>
-							<p className="dp-label mb-8 uppercase tracking-[0.4em] text-perfume-primary">
-								Scent Memory
-							</p>
-
-							<h2 className="dp-section-title max-w-6xl font-normal leading-[0.88] tracking-[-0.04em]">
-								SOME DIGITAL
-								<br />
-								EXPERIENCES
-								<br />
-								<span className="text-perfume-text/35">ARE SEEN.</span>
-							</h2>
-						</motion.div>
-
-						{/* OTHERS / ARE REMEMBERED */}
-						<motion.div
-							style={{
-								opacity: rememberedOpacity,
-								y: rememberedY,
-							}}
-							className="absolute inset-0 flex flex-col justify-center"
-						>
-							<p className="dp-label mb-8 uppercase tracking-[0.4em] text-perfume-primary">
-								Scent Memory
-							</p>
-
-							<h2 className="dp-section-title max-w-6xl font-normal leading-[0.88] tracking-[-0.04em]">
-								OTHERS
-								<br />
-								<span className="italic text-perfume-primary">
-									ARE REMEMBERED.
-								</span>
-							</h2>
-						</motion.div>
-
-						{/* THE DIFFERENCE */}
-						<motion.div
-							style={{
-								opacity: differenceOpacity,
-								y: differenceY,
-							}}
-							className="absolute inset-0 flex flex-col justify-center"
-						>
-							<p className="dp-label mb-8 uppercase tracking-[0.4em] text-perfume-primary">
-								The Difference
-							</p>
-
-							<h2 className="dp-section-title max-w-5xl font-normal leading-[0.9] tracking-[-0.04em]">
-								THAT&apos;S THE DIFFERENCE
-								<br />
-								<span className="text-perfume-text/45">BETWEEN A WEBSITE</span>
-								<br />
-								AND A{" "}
-								<span className="italic text-perfume-primary">
-									DIGITAL EXPERIENCE.
-								</span>
-							</h2>
-						</motion.div>
-					</div>
-
-					{/* Minimal progress line */}
-					{/* <div className="absolute bottom-10 left-6 right-6 flex items-center justify-center md:left-12 md:right-12">
-						<motion.div
-							style={{
-								scaleX: scrollYProgress,
-								transformOrigin: "left",
-							}}
-							className="h-px w-24 bg-perfume-primary/50 md:w-40"
-						/>
-					</div> */}
-				</div>
-			</div>
-		</section>
-	);
+  const { memory } = useAtelier();
+  return (
+    <div className="memory-layout">
+      <div className="memory-statements">
+        <div className="memory-statement" data-selected={memory === 0}>
+          <p className="eyebrow">Scent Memory</p>
+          <h2>
+            SOME DIGITAL
+            <br />
+            EXPERIENCES
+            <br />
+            <span className="muted">ARE SEEN.</span>
+          </h2>
+        </div>
+        <div className="memory-statement" data-selected={memory === 1}>
+          <p className="eyebrow">Scent Memory</p>
+          <h2>
+            OTHERS
+            <br />
+            <em>ARE REMEMBERED.</em>
+          </h2>
+        </div>
+        <div className="memory-statement" data-selected={memory === 2}>
+          <p className="eyebrow">The Difference</p>
+          <h2>
+            THAT&apos;S THE DIFFERENCE
+            <br />
+            <span className="muted">BETWEEN A WEBSITE</span>
+            <br />
+            AND A <em>DIGITAL EXPERIENCE.</em>
+          </h2>
+        </div>
+      </div>
+      <div className="memory-controls" aria-label="Scent memory statements">
+        {[
+          "SOME DIGITAL EXPERIENCES ARE SEEN.",
+          "OTHERS ARE REMEMBERED.",
+          "THAT'S THE DIFFERENCE BETWEEN A WEBSITE AND A DIGITAL EXPERIENCE.",
+        ].map((text, index) => (
+          <button
+            aria-label={text}
+            aria-pressed={memory === index}
+            key={text}
+            onClick={() => {
+              setAtelier({ memory: index });
+              seekChapterItem("memory", index, 3);
+            }}
+          >
+            <span />
+          </button>
+        ))}
+      </div>
+    </div>
+  );
 }
