@@ -211,26 +211,45 @@ export default function ImmersiveJourney(){
   useEffect(()=>{
     if(!host.current)return;
     gsap.registerPlugin(ScrollTrigger);
-    const ctx=gsap.context(()=>{
-      ScrollTrigger.create({trigger:host.current!,start:"top top",end:"bottom bottom",onUpdate:s=>{p.current=s.progress;}});
-      if(reduce)return;
-      gsap.utils.toArray<HTMLElement>(".journey-chapter").forEach((section,i)=>{
-        const headline=section.querySelector(".journey-title");
-        const caption=section.querySelector(".journey-caption");
-        const tl=gsap.timeline({scrollTrigger:{trigger:section,start:"top bottom",end:"bottom top",scrub:true}});
-        if(headline)tl.fromTo(headline,{opacity:0,y:120,scale:.72,rotateX:-30,filter:"blur(18px)"},{opacity:1,y:0,scale:1,rotateX:0,filter:"blur(0px)",duration:.35,ease:"none"},0)
-          .to(headline,{opacity:0,y:-145,scale:1.2,rotateX:17,filter:"blur(14px)",duration:.32,ease:"none"},.68);
-        if(caption)tl.fromTo(caption,{opacity:0,y:55},{opacity:1,y:0,duration:.27},.14).to(caption,{opacity:0,y:-60,duration:.23},.76);
+    const elements=Array.from(host.current.querySelectorAll<HTMLElement>(".journey-chapter"));
+    const update=(progress:number)=>{
+      p.current=progress;
+      const position=Math.min(progress*chapters.length,chapters.length-.00001);
+      elements.forEach((section,index)=>{
+        const distance=Math.abs(position-(index+.5));
+        const visibility=reduce ? (distance<.5 ? 1 : 0) : 1-THREE.MathUtils.smoothstep(distance,.26,.64);
+        const outgoing=position>index+.5;
+        gsap.set(section,{
+          autoAlpha:visibility,
+          yPercent:reduce?0:(outgoing?-1:1)*(1-visibility)*13,
+          scale:reduce?1:.88+.12*visibility,
+          rotateX:reduce?0:(outgoing?8:-8)*(1-visibility),
+          pointerEvents:visibility>.94?"auto":"none",
+        });
+        section.setAttribute("aria-hidden",visibility>.94?"false":"true");
+        if(index===3) {
+          const canvas=host.current?.querySelector<HTMLElement>(".journey-world");
+          if(canvas) canvas.style.pointerEvents=visibility>.82?"auto":"none";
+        }
       });
-    },host);
-    return ()=>ctx.revert();
+    };
+    const trigger=ScrollTrigger.create({
+      trigger:host.current,
+      start:"top top",
+      end:"bottom bottom",
+      onUpdate:self=>update(self.progress),
+      onRefresh:self=>update(self.progress),
+    });
+    update(trigger.progress);
+    return ()=>{trigger.kill();elements.forEach(el=>gsap.set(el,{clearProps:"all"}));};
   },[reduce]);
   return <main ref={host} className="journey">
     <div className="journey-world"><Scene p={p} reduced={reduce}/></div>
     <div className="journey-vignette" aria-hidden="true"/>
     <header className="journey-nav"><a href="#arrival">DP<span>·</span></a><span>THE DIGITAL ATELIER</span><a href="/">MAIN PORTFOLIO ↗</a></header>
     <nav className="journey-progress" aria-label="Chapters">{chapters.map((c,i)=><a key={c.id} href={"#"+c.id} aria-label={c.label}><span>{String(i+1).padStart(2,"0")}</span></a>)}</nav>
-    {chapters.map((chapter,i)=><section key={chapter.id} id={chapter.id} className={"journey-chapter journey-scene-"+i}>
+    <div className="journey-scroll-track" aria-hidden="true">{chapters.map((chapter,i)=><div key={chapter.id} id={chapter.id} className="journey-scroll-anchor" style={{top:`${(i+.5)/chapters.length*100}%`}} />)}</div>
+    <div className="journey-chapters">{chapters.map((chapter,i)=><section key={chapter.id} className={"journey-chapter journey-scene-"+i}>
       <div className="journey-copy">
         <p className="journey-label">{chapter.label}</p>
         <h1 className="journey-title">{i===0?<>DIGITAL<br/><em>PERFUMER.</em></>:i===2?<>DESIGN.<br/>CODE.<br/><em>IMPACT.</em></>:chapter.title}</h1>
@@ -242,7 +261,7 @@ export default function ImmersiveJourney(){
       </div>
       {i===0&&<a href="#philosophy" className="journey-scroll">SCROLL TO ENTER <span>↓</span></a>}
       <div className="journey-counter">{String(i+1).padStart(2,"0")} / 07</div>
-    </section>)}
+    </section>)}</div>
     <footer className="journey-footer"><span>DIGITAL PERFUMER / AN IMMERSIVE CREATIVE DEVELOPMENT EXPERIENCE</span><a href="/">BACK TO THE PORTFOLIO ↗</a></footer>
   </main>;
 }
