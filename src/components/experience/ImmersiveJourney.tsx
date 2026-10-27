@@ -180,7 +180,7 @@ function CameraRig({p}:{p:React.RefObject<number>}){
   });
   return null;
 }
-function Scene({p,reduced}:{p:React.RefObject<number>;reduced:boolean}){
+function Scene({p,reduced,active}:{p:React.RefObject<number>;reduced:boolean;active:number}){
   return <Canvas dpr={[1,1.65]} camera={{position:[0,0,9],fov:43}} gl={{powerPreference:"high-performance",antialias:true}} fallback={<div className="journey-fallback"/>}>
     <color attach="background" args={["#080b15"]}/>
     <fog attach="fog" args={["#080b15",12,35]}/>
@@ -190,10 +190,10 @@ function Scene({p,reduced}:{p:React.RefObject<number>;reduced:boolean}){
     <CameraRig p={p}/>
     <Suspense fallback={null}>
       <FragranceArtifact p={p} reduced={reduced}/>
-      <PhilosophyWorld p={p}/>
-      <CompositionWorld p={p}/>
-      <ProjectWorld p={p}/>
-      <ToolkitWorld p={p}/>
+      {active===1 && <PhilosophyWorld p={p}/>}
+      {active===2 && <CompositionWorld p={p}/>}
+      {active===3 && <ProjectWorld p={p}/>}
+      {active===4 && <ToolkitWorld p={p}/>}
       {!reduced&&<Sparkles count={120} scale={[17,9,15]} size={1.5} speed={.13} opacity={.32} color="#a1a9ee"/>}
     </Suspense>
   </Canvas>;
@@ -202,6 +202,7 @@ export default function ImmersiveJourney(){
   const host=useRef<HTMLElement>(null);
   const p=useRef(0);
   const [reduce,setReduce]=useState(false);
+  const [active,setActive]=useState(0);
   useEffect(()=>{
     const media=window.matchMedia("(prefers-reduced-motion: reduce)");
     const fn=()=>setReduce(media.matches);
@@ -214,6 +215,8 @@ export default function ImmersiveJourney(){
     const elements=Array.from(host.current.querySelectorAll<HTMLElement>(".journey-chapter"));
     const update=(progress:number)=>{
       p.current=progress;
+      const index=Math.min(chapters.length-1,Math.floor(Math.max(0,progress*chapters.length-0.0001)));
+      setActive(previous=>previous===index?previous:index);
       const position=Math.min(progress*chapters.length,chapters.length-.00001);
       elements.forEach((section,index)=>{
         const distance=Math.abs(position-(index+.5));
@@ -244,7 +247,7 @@ export default function ImmersiveJourney(){
     return ()=>{trigger.kill();elements.forEach(el=>gsap.set(el,{clearProps:"all"}));};
   },[reduce]);
   return <main ref={host} className="journey">
-    <div className="journey-world"><Scene p={p} reduced={reduce}/></div>
+    <div className="journey-world"><Scene p={p} reduced={reduce} active={active}/></div>
     <div className="journey-vignette" aria-hidden="true"/>
     <header className="journey-nav"><a href="#arrival">DP<span>·</span></a><span>THE DIGITAL ATELIER</span><a href="/">MAIN PORTFOLIO ↗</a></header>
     <nav className="journey-progress" aria-label="Chapters">{chapters.map((c,i)=><a key={c.id} href={"#"+c.id} aria-label={c.label}><span>{String(i+1).padStart(2,"0")}</span></a>)}</nav>
