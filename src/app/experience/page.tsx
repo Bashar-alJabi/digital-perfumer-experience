@@ -1,10 +1,10 @@
-import DigitalAtelier from "@/components/experience/DigitalAtelier";
+import ImmersiveJourney from "@/components/experience/ImmersiveJourney";
 
 export const metadata = {
-  title: "Digital Atelier — Cinematic Experience | Digital Perfumer",
-  description: "Enter the Digital Atelier: design, code and strategy composed into an immersive digital experience.",
+  title: "Digital Perfumer — The Digital Atelier",
+  description: "A cinematic journey through design, code and impact. An immersive portfolio experience by Bashar Al-Jabi.",
 };
 
 export default function ExperiencePage() {
-  return <DigitalAtelier />;
+  return <ImmersiveJourney />;
 }
