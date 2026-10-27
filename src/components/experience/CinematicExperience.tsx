@@ -12,6 +12,7 @@ function DigitalCore({ progress, reduced }: { progress: React.RefObject<number>;
   const group = useRef<THREE.Group>(null);
   const inner = useRef<THREE.Mesh>(null);
   const particles = useRef<THREE.Points>(null);
+  const architecture = useRef<THREE.Group>(null);
   const geometry = useMemo(() => {
     const count = 700;
     const positions = new Float32Array(count * 3);
@@ -40,13 +41,32 @@ function DigitalCore({ progress, reduced }: { progress: React.RefObject<number>;
     }
     if (inner.current) inner.current.rotation.z += reduced ? 0 : delta * 0.08;
     if (particles.current) particles.current.rotation.y -= reduced ? 0 : delta * 0.025;
-    state.camera.position.z = damp(state.camera.position.z, 7.8 - p * 2.5);
+    if (architecture.current) { architecture.current.position.z = damp(architecture.current.position.z, p * 3); architecture.current.rotation.z = damp(architecture.current.rotation.z, p * 0.3); }
+    state.camera.position.z = damp(state.camera.position.z, 7.8 - Math.sin(p * Math.PI * 0.82) * 4.5);
     state.camera.position.x = damp(state.camera.position.x, p > 0.48 ? 0.7 : 0);
     state.camera.lookAt(0, 0, 0);
   });
 
   return (
     <group ref={group}>
+      <group ref={architecture}>
+        {Array.from({ length: 9 }, (_, index) => (
+          <group key={index} position={[0, 0, -3.2 - index * 1.75]} rotation={[0, 0, index * 0.11]}>
+            <mesh>
+              <torusGeometry args={[2.2 + index * 0.1, 0.009, 6, 96]} />
+              <meshBasicMaterial color={index % 2 ? "#8189ff" : "#f36a83"} transparent opacity={0.35} depthWrite={false} />
+            </mesh>
+            <mesh rotation={[0, 0, Math.PI / 4]}>
+              <ringGeometry args={[2.65 + index * 0.1, 2.67 + index * 0.1, 4]} />
+              <meshBasicMaterial color="#a9a5ff" transparent opacity={0.1} side={THREE.DoubleSide} depthWrite={false} />
+            </mesh>
+          </group>
+        ))}
+      </group>
+      <mesh position={[0, 0, -5.5]}>
+        <torusKnotGeometry args={[1.5, 0.015, 180, 6, 3, 7]} />
+        <meshBasicMaterial color="#777cf7" transparent opacity={0.35} />
+      </mesh>
       <Float speed={reduced ? 0 : 1} floatIntensity={reduced ? 0 : 0.18} rotationIntensity={0}>
         <mesh ref={inner}>
           <icosahedronGeometry args={[1.1, 2]} />
@@ -76,7 +96,8 @@ function World({ progress, reduced }: { progress: React.RefObject<number>; reduc
   return (
     <Canvas camera={{ position: [0, 0, 7.8], fov: 43 }} dpr={[1, 1.75]} gl={{ alpha: true, antialias: true, powerPreference: "high-performance" }} fallback={<div className="exp-canvas-fallback" />}>
       <color attach="background" args={["#090b12"]} />
-      <ambientLight intensity={0.85} />
+      <ambientLight intensity={0.55} />
+      <fog attach="fog" args={["#090b12", 13, 33]} />
       <pointLight position={[3, 3, 4]} color="#ff839e" intensity={33} distance={12} />
       <pointLight position={[-4, -2, 2]} color="#828cff" intensity={25} distance={12} />
       {!reduced && <Stars radius={25} depth={18} count={850} factor={2} saturation={0} fade speed={0.25} />}
@@ -121,6 +142,7 @@ export default function CinematicExperience() {
       </header>
       <div className="exp-rail" aria-hidden="true"><span>01</span><i /><span>03</span></div>
       <section id="arrival" className="exp-panel exp-arrival">
+        <div className="exp-orbit-label" aria-hidden="true">FIG. 001 — DIGITAL ESSENCE / INTERACTIVE SYSTEM</div>
         <div className="exp-copy exp-copy-center">
           <p className="exp-eyebrow">BASHAR AL-JABI — CREATIVE DEVELOPER</p>
           <h1>DIGITAL<br /><em>PERFUMER</em></h1>
@@ -132,7 +154,7 @@ export default function CinematicExperience() {
       <section id="philosophy" className="exp-panel exp-philosophy">
         <div className="exp-copy exp-copy-left">
           <p className="exp-eyebrow">02 / THE PHILOSOPHY</p>
-          <h2>NOT JUST<br />WEBSITES.<br /><em>DIGITAL SCENTS.</em></h2>
+          <h2>BEYOND<br />THE SCREEN.<br /><em>INTO EXPERIENCE.</em></h2>
           <p>Every memorable digital experience begins with a signature — a balance of visual identity, thoughtful interaction and precise engineering.</p>
           <div className="exp-lines"><span>DESIGN</span><span>DEVELOPMENT</span><span>IMPACT</span></div>
         </div>
@@ -140,7 +162,7 @@ export default function CinematicExperience() {
       <section id="composition" className="exp-panel exp-composition">
         <div className="exp-copy exp-copy-right">
           <p className="exp-eyebrow">03 / THE COMPOSITION</p>
-          <h2>THE ART OF<br /><em>WHAT'S NEXT.</em></h2>
+          <h2>DESIGN.<br />CODE.<br /><em>IMPACT.</em></h2>
           <p>Design sets the first impression. Code brings it to life. Strategy makes it last.</p>
           <div className="exp-notes"><span>01 / DESIGN</span><span>02 / CODE</span><span>03 / GROWTH</span></div>
           <a className="exp-cta" href="/#work">Explore selected work ↗</a>
