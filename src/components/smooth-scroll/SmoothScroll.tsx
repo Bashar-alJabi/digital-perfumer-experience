@@ -1,40 +1,37 @@
 "use client";
-
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useEffect, type ReactNode } from "react";
 import Lenis from "lenis";
-import { useEffect } from "react";
-
-export default function SmoothScroll({
-	children,
-}: {
-	children: React.ReactNode;
-}) {
-	useEffect(() => {
-		gsap.registerPlugin(ScrollTrigger);
-
-		// Initialize smooth scrolling with fluid physics
-		const lenis = new Lenis({
-			duration: 1.4,
-			easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-			smoothWheel: true,
-			anchors: true,
-		});
-
-		lenis.on("scroll", ScrollTrigger.update);
-
-		const updateLenis = (time: number) => {
-			lenis.raf(time * 1000);
-		};
-
-		gsap.ticker.add(updateLenis);
-		gsap.ticker.lagSmoothing(0);
-
-		return () => {
-			gsap.ticker.remove(updateLenis);
-			lenis.destroy();
-		};
-	}, []);
-
-	return <>{children}</>;
+import { useAtelier } from "@/lib/atelier-state";
+export default function SmoothScroll({ children }: { children: ReactNode }) {
+  const { reduced } = useAtelier();
+  useEffect(() => {
+    // Native scrolling remains the source of truth, including anchors and touch.
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    let lenis: Lenis | undefined;
+    function update() {
+      lenis?.destroy();
+      lenis = undefined;
+      if (!media.matches && !reduced)
+        lenis = new Lenis({
+          autoRaf: true,
+          lerp: 0.09,
+          smoothWheel: true,
+          anchors: true,
+        });
+    }
+    update();
+    media.addEventListener("change", update);
+    const seek = (event: Event) => {
+      const top = (event as CustomEvent<{ top: number }>).detail.top;
+      if (lenis) lenis.scrollTo(top, { immediate: true });
+      else window.scrollTo({ top, behavior: "instant" });
+    };
+    window.addEventListener("atelier-seek", seek);
+    return () => {
+      media.removeEventListener("change", update);
+      window.removeEventListener("atelier-seek", seek);
+      lenis?.destroy();
+    };
+  }, [reduced]);
+  return <>{children}</>;
 }
