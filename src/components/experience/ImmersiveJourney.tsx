@@ -219,9 +219,12 @@ export default function ImmersiveJourney(){
       setActive(previous=>previous===index?previous:index);
       const position=Math.min(progress*chapters.length,chapters.length-.00001);
       elements.forEach((section,index)=>{
-        const distance=Math.abs(position-(index+.5));
-        const visibility=reduce ? (distance<.5 ? 1 : 0) : 1-THREE.MathUtils.smoothstep(distance,.26,.64);
-        const outgoing=position>index+.5;
+        const local=position-index;
+        const inside=local>=0&&local<1;
+        const fadeIn=index===0?1:THREE.MathUtils.smoothstep(local,0,.17);
+        const fadeOut=index===chapters.length-1?1:1-THREE.MathUtils.smoothstep(local,.79,1);
+        const visibility=inside?(reduce?1:fadeIn*fadeOut):0;
+        const outgoing=local>.5;
         gsap.set(section,{
           autoAlpha:visibility,
           yPercent:reduce?0:(outgoing?-1:1)*(1-visibility)*13,
