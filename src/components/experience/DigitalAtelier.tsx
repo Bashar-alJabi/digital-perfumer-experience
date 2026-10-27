@@ -167,6 +167,53 @@ export default function DigitalAtelier() {
     const t=ScrollTrigger.create({trigger:host.current,start:"top top",end:"bottom bottom",onUpdate:self=>{travel.current=self.progress}});
     return ()=>t.kill();
   },[]);
+  useEffect(() => {
+    if (!host.current || reduced) return;
+    gsap.registerPlugin(ScrollTrigger);
+    const ctx = gsap.context(() => {
+      const intro = host.current!.querySelector<HTMLElement>(".atelier-intro-title");
+      const chapters = gsap.utils.toArray<HTMLElement>(".atelier-chapter-two, .atelier-chapter-three");
+      if (intro) {
+        gsap.timeline({
+          scrollTrigger: {
+            trigger: ".atelier-intro",
+            start: "top top",
+            end: "bottom top",
+            scrub: true,
+          },
+        })
+          .to(intro, { yPercent: -33, z: -260, rotateX: -11, scale: .78, opacity: 0, ease: "none" }, 0)
+          .to(".atelier-topline", { y: -100, opacity: 0, ease: "none" }, 0)
+          .to(".atelier-scroll, .atelier-index", { opacity: 0, y: 80, ease: "none" }, 0);
+      }
+      chapters.forEach((section, index) => {
+        const narrative = section.querySelector<HTMLElement>(".atelier-narrative");
+        if (!narrative) return;
+        const title = narrative.querySelector("h2");
+        const kicker = narrative.querySelector(".atelier-kicker");
+        const details = narrative.querySelectorAll("p, .atelier-keywords, .atelier-formula, .atelier-action");
+        gsap.set(narrative, { transformPerspective: 1100, transformOrigin: index === 0 ? "left center" : "right center" });
+        const timeline = gsap.timeline({
+          scrollTrigger: {
+            trigger: section,
+            start: "top 90%",
+            end: "bottom 10%",
+            scrub: .65,
+          },
+        });
+        timeline
+          .fromTo(narrative,
+            { xPercent: index === 0 ? -38 : 38, yPercent: 22, rotateY: index === 0 ? 17 : -17, scale: .68, opacity: 0 },
+            { xPercent: 0, yPercent: 0, rotateY: 0, scale: 1, opacity: 1, duration: .42, ease: "power2.out" }, 0)
+          .fromTo(title, { y: 85, filter: "blur(12px)", opacity: 0 }, { y: 0, filter: "blur(0px)", opacity: 1, duration: .27 }, .1)
+          .fromTo(kicker, { x: -40, opacity: 0 }, { x: 0, opacity: 1, duration: .22 }, .12)
+          .fromTo(details, { y: 52, opacity: 0 }, { y: 0, opacity: 1, stagger: .045, duration: .22 }, .23)
+          .to(narrative, { yPercent: -25, xPercent: index === 0 ? 23 : -23, rotateY: index === 0 ? -12 : 12, scale: 1.12, opacity: 0, duration: .35, ease: "power2.in" }, .71);
+      });
+      ScrollTrigger.refresh();
+    }, host);
+    return () => ctx.revert();
+  }, [reduced]);
   return <main ref={host} className="atelier" id="top">
     <div className="atelier-stage" aria-hidden="true"><Stage travel={travel} reduce={reduced}/></div>
     <div className="atelier-vignette" aria-hidden="true"/>
