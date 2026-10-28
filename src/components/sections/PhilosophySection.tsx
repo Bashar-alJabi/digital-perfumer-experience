@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import PhilosophyStage from "@/components/cinematic/PhilosophyStage";
 
 const notes = [
 	{
@@ -35,6 +36,7 @@ const signatureDots = [
 export default function PhilosophySection() {
 	return (
 		<section className="relative px-6 py-32 text-perfume-text md:px-12 md:py-44">
+			<PhilosophyStage />
 			<div className="mx-auto max-w-7xl">
 				{/* Philosophy */}
 				<div className="grid items-start gap-16 lg:grid-cols-2 lg:gap-24">
