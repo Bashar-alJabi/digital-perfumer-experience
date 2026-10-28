@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useMotionValue, useSpring } from "framer-motion";
+import { motion, useMotionValue, useSpring } from "motion/react";
 import React, { useEffect, useRef, useState } from "react";
 
 interface Particle {
@@ -64,7 +64,7 @@ export default function CustomCursor() {
 	}, []);
 
 	useEffect(() => {
-		if (window.matchMedia("(pointer: coarse)").matches) return;
+		if (prefersReducedMotion || window.matchMedia("(pointer: coarse), (prefers-reduced-motion: reduce)").matches) return;
 
 		const canvas = canvasRef.current;
 		if (!canvas) return;
@@ -241,7 +241,7 @@ export default function CustomCursor() {
 				cancelAnimationFrame(animationFrameId);
 			}
 		};
-	}, [mouseX, mouseY]);
+	}, [mouseX, mouseY, prefersReducedMotion]);
 
 	if (prefersReducedMotion) {
 		return null;

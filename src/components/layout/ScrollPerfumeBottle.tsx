@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useScroll, useSpring, useTransform } from "framer-motion";
+import { motion, useScroll, useSpring, useTransform } from "motion/react";
 import { useEffect, useState } from "react";
 
 const sections = [
@@ -72,7 +72,7 @@ export default function ScrollPerfumeBottle() {
 	return (
 		<div
 			aria-hidden="true"
-			className="pointer-events-none fixed left-3 top-1/2 z-40 hidden -translate-y-1/2 sm:block md:left-5"
+			className="perfume-progress pointer-events-none fixed left-3 top-1/2 z-40 hidden -translate-y-1/2 sm:block md:left-5"
 		>
 			<div className="relative h-44 w-5 md:h-52 md:w-6">
 				{/* Bottle neck */}
