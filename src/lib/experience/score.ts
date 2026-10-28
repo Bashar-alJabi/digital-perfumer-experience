@@ -126,16 +126,11 @@ export function composeScore(
   add(at("about", 0.85), hidden);
   add(at("impact", 0.18), hidden, { rings: 1 });
   add(at("impact", 0.85), hidden);
-  add(
-    at("work", 0),
-    [pose(0.89, 0.23, 0.13), pose(0.92, 0.33, 0.1), pose(0.89, 0.42, 0.07)],
-    { fluid: 0, rings: 0, dark: 0.92 },
-  );
-  add(at("work", 0.95), [
-    pose(0.89, 0.23, 0.13),
-    pose(0.92, 0.33, 0.1),
-    pose(0.89, 0.42, 0.07),
-  ]);
+  const galleryNotes = mobile
+    ? [pose(0.82, 0.14, 0.07), pose(0.88, 0.14, 0.055), pose(0.94, 0.14, 0.04)]
+    : [pose(0.57, 0.18, 0.1), pose(0.63, 0.18, 0.08), pose(0.69, 0.18, 0.06)];
+  add(at("work", 0), galleryNotes, { fluid: 0, rings: 0, dark: 0.92 });
+  add(at("work", 0.95), galleryNotes);
   add(at("memory", 0), hidden, { stars: 1, dark: 1 });
   add(at("memory", 0.82), hidden);
   const skillNotes = mobile

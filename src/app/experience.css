@@ -1511,6 +1511,7 @@ header {
   }
   .skills-stage {
     gap: 25px;
+    justify-content: flex-start;
   }
   .skills-stage .scene-heading {
     flex-direction: column;
@@ -1532,7 +1533,12 @@ header {
     overflow-x: auto;
     gap: 12px;
     padding-bottom: 7px;
+    scrollbar-width:thin;
+    scrollbar-color:#f3637166 transparent;
   }
+  .skill-selector::-webkit-scrollbar { height:3px; }
+  .skill-selector::-webkit-scrollbar-track { background:transparent; }
+  .skill-selector::-webkit-scrollbar-thumb { background:#f3637166;border-radius:3px; }
   .skill-selector button {
     min-width: 150px;
     flex: 1;

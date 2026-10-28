@@ -17,6 +17,8 @@ export default function Experience({
 }) {
   useEffect(() => {
     const media = matchMedia("(prefers-reduced-motion: reduce)");
+    const initialAnchor = document.getElementById(location.hash.slice(1));
+    let anchorRaf = 0;
     const reduced = () =>
       media.matches || document.documentElement.dataset.motion === "reduced";
     let importing = false;
@@ -150,6 +152,17 @@ export default function Experience({
       measure();
       schedule();
     };
+    const restoreAnchor = () => {
+      if (disposed || !initialAnchor) return;
+      cancelAnimationFrame(anchorRaf);
+      anchorRaf = requestAnimationFrame(() => {
+        window.scrollTo({
+          top: initialAnchor.getBoundingClientRect().top + scrollY,
+          behavior: "instant",
+        });
+        resize();
+      });
+    };
     const changeMotion = () => {
       const active =
         chapters.find((el) => el.id === root.dataset.chapter) ?? chapters[0];
@@ -169,8 +182,13 @@ export default function Experience({
     const observer = new ResizeObserver(resize);
     chapters.forEach((el) => observer.observe(el));
     document.fonts.ready.then(() => {
-      if (!disposed) resize();
+      if (!disposed) {
+        resize();
+        restoreAnchor();
+      }
     });
+    if (document.readyState === "complete") restoreAnchor();
+    else addEventListener("load", restoreAnchor, { once: true });
     addEventListener("scroll", schedule, { passive: true });
     addEventListener("resize", resize);
     media.addEventListener("change", changeMotion);
@@ -179,6 +197,8 @@ export default function Experience({
     return () => {
       disposed = true;
       cancelAnimationFrame(raf);
+      cancelAnimationFrame(anchorRaf);
+      removeEventListener("load", restoreAnchor);
       observer.disconnect();
       disposeWorld?.();
       media.removeEventListener("change", changeMotion);

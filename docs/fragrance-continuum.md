@@ -34,10 +34,14 @@ The reduced-motion control was exercised in the production build: the 3D canvas 
 
 Contact service selection and native required-field validation were exercised. Empty submission focuses the required Name field and displays the browser's validation message. The production Formspree endpoint and handler remain unchanged; no valid message was sent to the live inbox, and email delivery is therefore unverified.
 
-The final composition pass moves the Skills notes clear of its introductory text, softens the Philosophy surface reflections, and holds the dark Contact atmosphere until the form has left the viewport. Footer notes land at the measured signature dot positions.
+The final composition pass moves the Skills and gallery notes clear of text and controls, softens the Philosophy surface reflections, and holds the dark Contact atmosphere until the form has left the viewport. Footer notes land at the measured signature dot positions. Direct section URLs are restored after the enhanced layout and fonts are measured; reloading `#skills` was verified to land at the Skills chapter. Reverse scrolling through the first Philosophy card was visually verified back to the sphere. Back to Top was verified to return to scroll position zero.
+
+HTTP checks returned 200 for the production page, robots.txt, sitemap.xml, the CV and all eleven project image files. No JavaScript errors appeared in the final local production browser log.
 
 ## Scope of this draft
 
 This is a coherent first art-direction pass across all ten chapters. It remains a review draft. Physical iOS/Android devices, Safari, Firefox, GPU context loss, network failure during form submission, live email delivery and a measured performance/accessibility audit remain outside the completed test scope. The visual quality should be assessed in the running preview; a passing build alone does not establish that the full creative brief has been achieved.
 
 ![Production desktop Hero](previews/hero-desktop.jpg)
+
+![Philosophy shared surface](previews/philosophy-desktop.jpg)
