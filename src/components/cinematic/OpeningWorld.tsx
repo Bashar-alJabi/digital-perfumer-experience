@@ -16,7 +16,7 @@ const curves=[
 function Filament({index,progress}:{index:number;progress:React.RefObject<number>}){
   const ref=useRef<THREE.Mesh>(null);
   const geometry=useMemo(()=>{
-    const path=new THREE.CatmullRomCurve3(curves[index].map(p=>new THREE.Vector3(...p)));
+    const path=new THREE.CatmullRomCurve3(curves[index].map(p=>new THREE.Vector3(p[0],p[1],p[2])));
     return new THREE.TubeGeometry(path,126,.022,6,false);
   },[index]);
   useFrame(({clock})=>{
