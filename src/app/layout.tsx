@@ -2,6 +2,7 @@ import SmoothScroll from "@/components/smooth-scroll/SmoothScroll";
 import type { Metadata } from "next";
 import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
+import "./experience.css";
 
 // Load Google Fonts with CSS variables
 const playfair = Playfair_Display({

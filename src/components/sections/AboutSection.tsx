@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import React from "react";
 
 // Key statistics highlighting real-world impact
@@ -14,8 +14,8 @@ import React from "react";
 export default function AboutSection() {
 	return (
 		<section
-			id="about"
-			className="relative py-28 md:py-36 px-6 md:px-12 bg-perfume-bg text-perfume-text overflow-hidden border-t border-perfume-soft/40"
+			data-about-content
+			className="about-stage scene-stage relative py-28 md:py-36 px-6 md:px-12 bg-perfume-bg text-perfume-text overflow-hidden border-t border-perfume-soft/40"
 		>
 			{/* Background Glow */}
 			<div className="absolute bottom-10 right-10 w-125 h-125 bg-perfume-primary/5 rounded-full blur-[150px] pointer-events-none" />
