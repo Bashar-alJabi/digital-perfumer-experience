@@ -1,0 +1,83 @@
+/*
+ * DIGITAL PERFUMER / CINEMATIC ATLAS
+ * The existing editorial design is the foreground. The scene adds cinematic
+ * depth, never counterfeit project cards or rewritten headings.
+ */
+.cinematic-site{--cn-dark:0;position:relative;isolation:isolate;overflow:clip;background:#ffeff5}
+.cn-scene{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.cn-ambient{position:absolute;inset:0;pointer-events:none}
+.cn-ambient-day{
+  background:
+    radial-gradient(ellipse 47% 53% at 78% 39%,#ffd1e388 0%,transparent 69%),
+    radial-gradient(ellipse 60% 52% at 6% 74%,#fff9faf0 0%,transparent 72%),
+    linear-gradient(138deg,#fff5f7 3%,#ffeff5 42%,#f8dce7 100%)
+}
+.cn-ambient-night{
+  opacity:var(--cn-dark);
+  background:
+    radial-gradient(ellipse 36% 36% at 69% 43%,#593047 0%,transparent 80%),
+    radial-gradient(ellipse 42% 47% at 17% 79%,#38203d 0%,transparent 77%),
+    linear-gradient(135deg,#0c0a13 0%,#241428 51%,#0b0a16 100%);
+}
+.cn-webgl{position:absolute;inset:0;z-index:1;pointer-events:none}
+.cn-webgl canvas{display:block;width:100%;height:100%;pointer-events:none}
+.cn-light-leak{
+  position:absolute;inset:0;pointer-events:none;z-index:2;
+  background:
+    radial-gradient(ellipse 30% 40% at 87% 12%,#fffcff55,transparent 78%),
+    radial-gradient(ellipse 46% 45% at 16% 86%,#ef8ca61c,transparent 85%);
+  mix-blend-mode:screen;
+}
+.cn-grain{
+  position:absolute;inset:0;opacity:.055;z-index:3;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.72' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-size:160px 160px
+}
+.cinematic-site>section{position:relative;z-index:2;isolation:isolate}
+.cinematic-site>section>section.bg-perfume-bg,
+.cinematic-site #home>section.bg-perfume-bg,
+.cinematic-site #formula>section.bg-perfume-bg,
+.cinematic-site #impact>section.bg-perfume-bg,
+.cinematic-site #work>section.bg-perfume-bg,
+.cinematic-site #memory>section.bg-perfume-bg,
+.cinematic-site #skills>section.bg-perfume-bg,
+.cinematic-site #contact>section.bg-perfume-bg{
+  background-color:transparent!important;
+}
+.cinematic-site :is(h1,h2){
+  transform-style:preserve-3d;
+  backface-visibility:hidden;
+  transform-origin:50% 45%;
+}
+.cinematic-site #home .z-10{text-shadow:0 6px 40px #fff4f8a8}
+.cinematic-site #philosophy .space-y-8>div{
+  --cn-note-glow:0;
+  box-shadow:0 14px 45px rgba(85,29,57,.06),0 0 calc(var(--cn-note-glow) * 40px) rgba(243,99,113,.14);
+  transition:box-shadow .35s ease,border-color .35s ease;
+}
+.cinematic-site #philosophy .space-y-8>div.cn-note-current{
+  border-color:rgba(243,99,113,.45);
+}
+.cinematic-site #impact .aspect-square{
+  --cn-circle-progress:0;
+  filter:drop-shadow(0 0 calc(var(--cn-circle-progress) * 20px) rgba(243,99,113,.22));
+  transition:filter .2s linear;
+}
+.cinematic-site #memory{color:#f8ecf1!important}
+.cinematic-site #memory .text-perfume-text,
+.cinematic-site #memory [class*="text-perfume-text"]{color:#f8ecf1!important}
+.cinematic-site #memory .text-perfume-text\/35{color:rgba(248,236,241,.48)!important}
+.cinematic-site #memory .text-perfume-primary{color:#ffb5cc!important}
+.cinematic-site #memory .text-perfume-text\/60{color:rgba(248,236,241,.72)!important}
+.cinematic-site #work :is(button,a),.cinematic-site #contact :is(button,a,input,textarea){position:relative;z-index:3}
+@media(max-width:767px){
+  .cn-light-leak{opacity:.45}
+  .cn-grain{opacity:.025}
+  .cinematic-site :is(h1,h2){backface-visibility:visible}
+}
+@media(prefers-reduced-motion:reduce){
+  .cn-webgl{display:none}
+  .cn-grain{display:none}
+  .cinematic-site :is(h1,h2){transform:none!important;opacity:1!important;filter:none!important}
+  .cinematic-site #philosophy .space-y-8>div{box-shadow:none}
+}
