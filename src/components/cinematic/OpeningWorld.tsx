@@ -70,16 +70,17 @@ function Pearl({index,progress,ready,source,targets,blend}:{index:number;progres
       const halfWidth=halfHeight*perspective.aspect;
       const x=target[0]*halfWidth+perspective.position.x;
       const y=-target[1]*halfHeight+perspective.position.y;
-      const amount=ease(.06,.88,blend.current);
+      const amount=ease(.1,1,blend.current);
       position.x=THREE.MathUtils.lerp(position.x,x,amount);
       position.y=THREE.MathUtils.lerp(position.y,y,amount);
+      position.z=THREE.MathUtils.lerp(position.z,2.75,amount);
     }
     const alpha=1-Math.exp(-delta*5.4);
     root.current.position.lerp(position,alpha);
     source.current[index].copy(root.current.position);
     root.current.rotation.y+=delta*.21;
     root.current.rotation.z=Math.sin(clock.elapsedTime*.34+index)*.11;
-    const scale=(.69+index*.06)*(1-ease(.62,1,p)*.52)*ready.current;
+    const scale=(.69+index*.06)*(1-ease(.72,1,p)*.4)*ready.current;
     root.current.scale.setScalar(THREE.MathUtils.lerp(root.current.scale.x,scale,alpha));
     if(trail.current){
       trail.current.scale.setScalar(1.4+entry*.25);
@@ -155,12 +156,17 @@ export default function OpeningWorld(){
       pending=0;
       const rect=hero.getBoundingClientRect();
       const philosophyRect=philosophy.getBoundingClientRect();
-      philosophyBlend.current=clamp((innerHeight*.82-philosophyRect.top)/(innerHeight*.72));
       const cards=Array.from(philosophy.querySelectorAll<HTMLElement>(".space-y-8 > div"));
+      const reached=cards.map(card=>{const r=card.getBoundingClientRect();return clamp((innerHeight*.76-r.top)/(innerHeight*.54))});
+      philosophyBlend.current=Math.max(...reached,0);
+
       noteTargets.current=cards.map((card,i)=>{
         const marker=card.querySelector<HTMLElement>(`[title="${["Top Note","Heart Note","Base Note"][i]}"]`);
         const point=(marker??card).getBoundingClientRect();
-        return [((point.left+point.width*.5)/innerWidth-.5)*2,((point.top+point.height*.5)/innerHeight-.5)*2];
+        // Keep the actual 3D notes OUTSIDE the opaque card surfaces.
+        // They sit on the left margin, visible above the composition.
+        const x=point.left-Math.min(34,Math.max(16,point.width*1.3));
+        return [((x)/innerWidth-.5)*2,((point.top+point.height*.5)/innerHeight-.5)*2];
       });
       progress.current=clamp(-rect.top/Math.max(1,rect.height-window.innerHeight*.2));
       const show=clamp((philosophyRect.bottom-window.innerHeight*.1)/Math.max(1,window.innerHeight*.6));
