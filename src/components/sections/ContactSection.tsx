@@ -1,7 +1,7 @@
 "use client";
 
 import { useForm, ValidationError } from "@formspree/react";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import React, { useState } from "react";
 
 interface ServiceOption {
@@ -84,6 +84,9 @@ export default function ContactSection() {
 	return (
 		<section className="relative py-28 md:py-36 px-6 md:px-12 bg-perfume-bg text-perfume-text border-t border-perfume-soft/40 overflow-hidden">
 			<div className="max-w-7xl mx-auto">
+				<div className="contact-signature" aria-hidden="true">
+					{[0, 1, 2].map(i => <span key={i} data-note-anchor={`contact-${i}`} />)}
+				</div>
 				{/* Main Contact Container */}
 				<div className="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-20 items-start">
 					{/* Left Column: Call to Action & Direct Links */}

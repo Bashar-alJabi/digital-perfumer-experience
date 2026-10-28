@@ -1,6 +1,8 @@
 "use client";
 
-import { motion, useScroll, useTransform } from "framer-motion";
+import { useChapterProgress } from "@/components/three-notes/ThreeNotesProvider";
+import { formulaLayers } from "@/lib/three-notes/score";
+import { motion, useTransform } from "motion/react";
 import React, { useRef } from "react";
 
 const formulaNotes = [
@@ -24,10 +26,7 @@ const formulaNotes = [
 export default function FormulaSection() {
 	const formulaRef = useRef<HTMLDivElement>(null);
 
-	const { scrollYProgress } = useScroll({
-		target: formulaRef,
-		offset: ["start end", "end start"],
-	});
+	const scrollYProgress = useChapterProgress("formula");
 
 	/*
 	 * ============================================================
@@ -40,11 +39,7 @@ export default function FormulaSection() {
 
 	const bottleRotate = useTransform(scrollYProgress, [0, 0.5, 1], [-3, 0, 3]);
 
-	const liquidHeight = useTransform(
-		scrollYProgress,
-		[0.12, 0.82],
-		["8%", "78%"],
-	);
+	const liquidHeight = useTransform(scrollYProgress, p => (8 + formulaLayers(p).reduce((a,b) => a+b, 0) * 23.33) + "%");
 
 	const liquidOpacity = useTransform(scrollYProgress, [0.05, 0.2], [0.25, 1]);
 
@@ -85,11 +80,7 @@ export default function FormulaSection() {
 		[35, 0, -10],
 	);
 
-	const mobileLiquidHeight = useTransform(
-		scrollYProgress,
-		[0.12, 0.82],
-		["8%", "78%"],
-	);
+	const mobileLiquidHeight = useTransform(scrollYProgress, p => (8 + formulaLayers(p).reduce((a,b) => a+b, 0) * 23.33) + "%");
 
 	const mobileLiquidOpacity = useTransform(
 		scrollYProgress,
@@ -120,7 +111,7 @@ export default function FormulaSection() {
 					</div>
 
 					{/* Bottle composition */}
-					<div className="relative mx-auto flex min-h-162.5 max-w-6xl items-center justify-center md:min-h-180">
+					<div className="formula-composition relative mx-auto flex min-h-162.5 max-w-6xl items-center justify-center md:min-h-180">
 						{/* =====================================================
 						    DESKTOP / TABLET NOTES
 						    ===================================================== */}
@@ -219,7 +210,8 @@ export default function FormulaSection() {
 								y: bottleY,
 								rotate: bottleRotate,
 							}}
-							className="relative z-10 hidden h-117.5 w-67.5 md:block md:h-135 md:w-[320px]"
+							data-note-anchor="bottle-desktop"
+							className="formula-bottle relative z-10 hidden h-117.5 w-67.5 md:block md:h-135 md:w-[320px]"
 						>
 							<Bottle
 								liquidHeight={liquidHeight}
@@ -232,7 +224,8 @@ export default function FormulaSection() {
 							style={{
 								y: mobileBottleY,
 							}}
-							className="relative z-10 h-105 w-57.5 md:hidden"
+							data-note-anchor="bottle-mobile"
+							className="formula-bottle relative z-10 h-105 w-57.5 md:hidden"
 						>
 							<Bottle
 								liquidHeight={mobileLiquidHeight}
@@ -292,7 +285,7 @@ function Bottle({
 
 			{/* Cap */}
 			<div
-				className={`absolute left-1/2 top-0 z-30 -translate-x-1/2 ${
+				className={`formula-cap absolute left-1/2 top-0 z-30 -translate-x-1/2 ${
 					mobile ? "h-18 w-20" : "h-20.5 w-23"
 				}`}
 			>
@@ -325,7 +318,7 @@ function Bottle({
 
 			{/* Bottle Body */}
 			<div
-				className={`absolute bottom-0 left-1/2 -translate-x-1/2 overflow-hidden rounded-[42px] border border-black/10 bg-perfume-surface/55 shadow-[0_30px_80px_rgba(243,99,113,0.12)] ${
+				className={`bottle-body absolute bottom-0 left-1/2 -translate-x-1/2 overflow-hidden rounded-[42px] border border-black/10 bg-perfume-surface/55 shadow-[0_30px_80px_rgba(243,99,113,0.12)] ${
 					mobile ? "h-87.5 w-57.5" : "h-97.5 w-67.5 md:h-111.25 md:w-[320px]"
 				}`}
 			>
@@ -348,7 +341,7 @@ function Bottle({
 						height: liquidHeight,
 						opacity: liquidOpacity,
 					}}
-					className="absolute bottom-0 left-0 right-0 overflow-hidden bg-perfume-primary"
+					className="formula-liquid absolute bottom-0 left-0 right-0 overflow-hidden bg-perfume-primary"
 				>
 					<div className="absolute left-0 right-0 top-0 h-0.5 bg-perfume-soft opacity-80" />
 
@@ -361,6 +354,7 @@ function Bottle({
 					<div className="absolute bottom-[58%] left-[42%] h-1 w-1 rounded-full bg-white/20" />
 				</motion.div>
 
+				<div className="formula-ripples" aria-hidden="true"><i /><i /><i /></div>
 				{/* Label */}
 				<div
 					className={`absolute left-1/2 top-1/2 z-40 -translate-x-1/2 -translate-y-1/2 border border-black/10 bg-perfume-surface/95 text-center backdrop-blur-sm ${

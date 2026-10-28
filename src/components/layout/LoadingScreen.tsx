@@ -1,9 +1,11 @@
 "use client";
 
+import { useScore } from "@/components/three-notes/ThreeNotesProvider";
 import gsap from "gsap";
 import { useEffect, useRef } from "react";
 
 export default function LoadingScreen() {
+	const score = useScore();
 	const containerRef = useRef<HTMLDivElement>(null);
 	const organismRef = useRef<SVGPathElement>(null);
 	const glowRef = useRef<SVGCircleElement>(null);
@@ -11,345 +13,87 @@ export default function LoadingScreen() {
 	const dotRefs = useRef<(SVGCircleElement | null)[]>([]);
 	const dustRefs = useRef<(SVGCircleElement | null)[]>([]);
 
+
 	useEffect(() => {
-		const container = containerRef.current;
-		const organism = organismRef.current;
-		const glow = glowRef.current;
-		const core = coreRef.current;
-
-		if (!container || !organism || !glow || !core) return;
-
+		const container = containerRef.current!;
+		const organism = organismRef.current!;
 		const dots = dotRefs.current.filter(Boolean) as SVGCircleElement[];
 		const dust = dustRefs.current.filter(Boolean) as SVGCircleElement[];
-
-		const reducedMotion = window.matchMedia(
-			"(prefers-reduced-motion: reduce)",
-		).matches;
-
+		const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+		const previousOverflow = document.documentElement.style.overflow;
+		const previousBodyOverflow = document.body.style.overflow;
+		let cancelled = false;
+		let timeout: ReturnType<typeof setTimeout>;
+		let minimum: ReturnType<typeof setTimeout>;
+		let unsubscribe: (() => void) | undefined;
+		let exit: gsap.core.Timeline | undefined;
+		score.intro.set(0);
+		document.documentElement.dataset.notesLoading = "true";
+		document.documentElement.style.overflow = "hidden";
 		document.body.style.overflow = "hidden";
-
-		const ctx = gsap.context(() => {
-			/*
-			 * THE ORGANISM
-			 * Starts as one living mass.
-			 */
-			gsap.set(container, {
-				opacity: 1,
-			});
-
-			gsap.set(organism, {
-				opacity: 0,
-				scale: 0.08,
-				transformOrigin: "center",
-			});
-
-			gsap.set(glow, {
-				opacity: 0,
-				scale: 0.2,
-				transformOrigin: "center",
-			});
-
-			gsap.set(core, {
-				opacity: 0,
-				scale: 0,
-				transformOrigin: "center",
-			});
-
-			gsap.set(dots, {
-				opacity: 0,
-				scale: 0,
-				transformOrigin: "center",
-			});
-
-			gsap.set(dust, {
-				opacity: 0,
-				scale: 0,
-				transformOrigin: "center",
-			});
-
-			if (reducedMotion) {
-				gsap.set(organism, {
-					opacity: 1,
-					scale: 1,
-				});
-
-				gsap.to(container, {
-					opacity: 0,
-					duration: 0.4,
-					delay: 0.5,
-					onComplete: () => {
-						container.style.display = "none";
-						document.body.style.overflow = "";
-					},
-				});
-
-				return;
-			}
-
-			const tl = gsap.timeline({
-				onComplete: () => {
-					container.style.display = "none";
-					document.body.style.overflow = "";
-				},
-			});
-
-			/*
-			 * PHASE 1
-			 * Something wakes up.
-			 */
-			tl.to(glow, {
-				opacity: 0.75,
-				scale: 1,
-				duration: 1.2,
-				ease: "power2.out",
-			})
-				.to(
-					organism,
-					{
-						opacity: 1,
-						scale: 1,
-						duration: 0.9,
-						ease: "elastic.out(1, 0.55)",
-					},
-					"-=0.9",
-				)
-				.to(
-					core,
-					{
-						opacity: 0.35,
-						scale: 1,
-						duration: 1,
-						ease: "power2.out",
-					},
-					"-=1",
-				);
-
-			/*
-			 * PHASE 2
-			 * Breathing / living.
-			 */
-			tl.to(organism, {
-				scaleX: 1.08,
-				scaleY: 0.92,
-				duration: 0.55,
-				ease: "sine.inOut",
-				yoyo: true,
-				repeat: 1,
-			})
-				.to(
-					glow,
-					{
-						scale: 1.35,
-						opacity: 0.35,
-						duration: 0.55,
-						ease: "sine.inOut",
-						yoyo: true,
-						repeat: 1,
-					},
-					"<",
-				)
-				.to(
-					core,
-					{
-						scale: 1.35,
-						opacity: 0.5,
-						duration: 0.55,
-						ease: "sine.inOut",
-						yoyo: true,
-						repeat: 1,
-					},
-					"<",
-				);
-
-			/*
-			 * PHASE 3
-			 * The organism becomes unstable.
-			 */
-			tl.to(organism, {
-				scale: 1.18,
-				duration: 0.35,
-				ease: "power2.in",
-			}).to(organism, {
-				scale: 0.88,
-				duration: 0.3,
-				ease: "power3.in",
-			});
-
-			/*
-			 * PHASE 4
-			 * Explosion / birth of the three notes.
-			 */
-			tl.to(
-				organism,
-				{
-					opacity: 0,
-					scale: 0.25,
-					duration: 0.3,
-					ease: "power4.in",
-				},
-				"+=0.05",
-			)
-				.to(
-					core,
-					{
-						opacity: 0,
-						scale: 2,
-						duration: 0.35,
-						ease: "power3.out",
-					},
-					"<",
-				)
-				.to(
-					glow,
-					{
-						scale: 2.5,
-						opacity: 0,
-						duration: 0.55,
-						ease: "power2.out",
-					},
-					"<",
-				)
-				.to(
-					dots,
-					{
-						opacity: 1,
-						scale: 1,
-						duration: 0.7,
-						stagger: 0.08,
-						ease: "back.out(2.5)",
-					},
-					"-=0.15",
-				);
-
-			/*
-			 * PHASE 5
-			 * Each note behaves like a living creature.
-			 */
-			dots.forEach((dot, index) => {
-				const angle = [-2.1, -1.05, 0.25][index] ?? 0;
-				const distance = [115, 105, 125][index] ?? 110;
-
-				tl.to(
-					dot,
-					{
-						x: Math.cos(angle) * distance,
-						y: Math.sin(angle) * distance,
-						scale: [1.2, 0.85, 1.05][index] ?? 1,
-						duration: 0.65,
-						ease: "power2.out",
-					},
-					"-=0.55",
-				);
-			});
-
-			/*
-			 * Little fragments released during the split.
-			 */
-			tl.to(
-				dust,
-				{
-					opacity: (index) => (index % 3 === 0 ? 0.65 : 0.3),
-					scale: (index) => 0.5 + (index % 4) * 0.2,
-					x: (index) => Math.cos(index * 1.7) * (70 + index * 4),
-					y: (index) => Math.sin(index * 2.1) * (60 + index * 3),
-					duration: 0.8,
-					stagger: 0.015,
-					ease: "power2.out",
-				},
-				"-=0.55",
-			);
-
-			/*
-			 * PHASE 6
-			 * They orbit each other.
-			 */
-			dots.forEach((dot, index) => {
-				tl.to(
-					dot,
-					{
-						x: Math.cos(index * 2.1) * 75,
-						y: Math.sin(index * 2.1) * 75,
-						rotation: index === 1 ? -12 : 12,
-						duration: 0.9,
-						ease: "sine.inOut",
-					},
-					"-=0.75",
-				);
-			});
-
-			/*
-			 * PHASE 7
-			 * They recognize the logo shape.
-			 */
-			dots.forEach((dot, index) => {
-				tl.to(
-					dot,
-					{
-						x: (index - 1) * 28,
-						y: 0,
-						scale: 1,
-						rotation: 0,
-						duration: 1,
-						ease: "expo.inOut",
-					},
-					"-=0.8",
-				);
-			});
-
-			/*
-			 * Final heartbeat.
-			 */
-			tl.to(dots, {
-				scale: 1.25,
-				duration: 0.35,
-				stagger: 0.06,
-				ease: "power2.inOut",
-				yoyo: true,
-				repeat: 1,
-			});
-
-			/*
-			 * PHASE 8
-			 * Logo dissolves into the website.
-			 */
-			tl.to(dust, {
-				opacity: 0,
-				scale: 0,
-				duration: 0.5,
-			})
-				.to(
-					dots,
-					{
-						opacity: 0,
-						scale: 2.2,
-						duration: 0.7,
-						stagger: 0.04,
-						ease: "power3.in",
-					},
-					"-=0.2",
-				)
-				.to(
-					container,
-					{
-						opacity: 0,
-						scale: 1.08,
-						duration: 1,
-						ease: "power3.inOut",
-					},
-					"-=0.45",
-				);
-		}, container);
-
-		return () => {
-			ctx.revert();
-			document.body.style.overflow = "";
+		const unlock = () => {
+			document.documentElement.style.overflow = previousOverflow;
+			document.body.style.overflow = previousBodyOverflow;
+			delete document.documentElement.dataset.notesLoading;
+			window.dispatchEvent(new Event("three-notes-loaded"));
 		};
-	}, []);
+		const ctx = gsap.context(() => {
+			gsap.set([organism, glowRef.current, coreRef.current], { transformOrigin: "center" });
+			gsap.set(organism, { scale: .1, opacity: 0 });
+			gsap.set([dots, dust], { opacity: 0 });
+			gsap.fromTo(glowRef.current, { scale: .3, opacity: 0 }, { scale: 1, opacity: .75, duration: reduced ? 0 : .55 });
+			gsap.to(organism, { scale: 1, opacity: 1, duration: reduced ? 0 : .55, ease: "power3.out" });
+			gsap.to(coreRef.current, { opacity: .35, duration: .5 });
+		}, container);
+		const ready = new Promise<void>(resolve => {
+			if (score.ready.get()) resolve();
+			else unsubscribe = score.ready.on("change", value => { if (value) resolve(); });
+		});
+		const deadline = new Promise<void>(resolve => { timeout = setTimeout(resolve, reduced ? 350 : 1800); });
+		const opening = new Promise<void>(resolve => { minimum = setTimeout(resolve, reduced ? 0 : 480); });
+		void Promise.all([opening, Promise.race([Promise.all([document.fonts.ready, ready]), deadline])]).then(() => {
+			if (cancelled) return;
+			clearTimeout(timeout); unsubscribe?.();
+			// No project images block entry: those assets are intentionally lazy, below the fold.
+			const targets = Array.from(document.querySelectorAll<HTMLElement>("[data-hero-signature] [data-note-anchor]"));
+			const skipFlight = reduced || window.scrollY > innerHeight * .5 || (location.hash !== "" && location.hash !== "#home");
+			const scale = Math.max(innerWidth / 1000, innerHeight / 1000);
+			const intro = { value: 0 };
+			exit = gsap.timeline({ onComplete: () => {
+				container.style.display = "none";
+				score.intro.set(1); unlock();
+			} });
+			exit.to([organism, coreRef.current, glowRef.current], { opacity: 0, scale: .3, duration: skipFlight ? .1 : .3 });
+			if (!skipFlight) {
+				exit.to(dots, { opacity: 1, duration: .2, stagger: .04 }, "<");
+				dots.forEach((dot, i) => {
+					const box = targets[i]?.getBoundingClientRect();
+					if (!box) return;
+					exit!.to(dot, {
+						x: (box.left + box.width / 2 - innerWidth / 2) / scale,
+						y: (box.top + box.height / 2 - innerHeight / 2) / scale,
+						attr: { r: box.width / 2 / scale, fill: ["#f36371", "#ffd8df", "#000000"][i] },
+						duration: .65, ease: "power3.inOut",
+					}, .22);
+				});
+				exit.to(dust, { opacity: .4, x: i => Math.cos(i * 2.1) * (60 + i * 3), y: i => Math.sin(i * 1.7) * (60 + i * 2), duration: .35 }, .1)
+					.to(dust, { opacity: 0, duration: .3 }, .45)
+					.to(container, { backgroundColor: "#ffeff5", duration: .55 }, .18)
+					.to(container.querySelectorAll(".dp-label"), { opacity: 0, duration: .2 }, .15);
+			}
+			exit.to(intro, { value: 1, duration: skipFlight ? .12 : .5, onUpdate: () => score.intro.set(intro.value) }, skipFlight ? .05 : .52)
+				.to(container, { opacity: 0, duration: skipFlight ? .15 : .5 }, skipFlight ? .05 : .58);
+		});
+		return () => {
+			cancelled = true; clearTimeout(timeout); clearTimeout(minimum); unsubscribe?.(); exit?.kill(); ctx.revert(); unlock();
+		};
+	}, [score]);
 
 	return (
 		<div
 			ref={containerRef}
-			className="fixed inset-0 z-100 flex items-center justify-center overflow-hidden bg-[#090708]"
+			data-lenis-prevent
+			className="notes-loader fixed inset-0 z-100 flex items-center justify-center overflow-hidden bg-[#090708]"
 			role="status"
 			aria-label="Entering Digital Perfumer"
 		>

@@ -1,6 +1,7 @@
 "use client";
 
-import { AnimatePresence, motion, useScroll } from "framer-motion";
+import { useChapterProgress } from "@/components/three-notes/ThreeNotesProvider";
+import { AnimatePresence, motion } from "motion/react";
 import React, { useEffect, useRef, useState } from "react";
 
 interface SkillGroup {
@@ -126,16 +127,13 @@ export default function TechStackSection() {
 
 	const [activeGroupIndex, setActiveGroupIndex] = useState(0);
 
-	const { scrollYProgress } = useScroll({
-		target: sectionRef,
-		offset: ["start start", "end end"],
-	});
+	const scrollYProgress = useChapterProgress("skills");
 
 	useEffect(() => {
 		const mediaQuery = window.matchMedia("(min-width: 1024px)");
 
 		const handleScrollChange = (progress: number) => {
-			if (!mediaQuery.matches) return;
+			if (!mediaQuery.matches || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
 			const index = Math.min(
 				skillGroups.length - 1,
@@ -188,7 +186,16 @@ export default function TechStackSection() {
 								return (
 									<button
 										key={group.id}
-										onClick={() => setActiveGroupIndex(index)}
+										type="button"
+										aria-pressed={isActive}
+										data-note-anchor={`skill-${index}`}
+										onClick={() => {
+											setActiveGroupIndex(index);
+											if (matchMedia("(min-width: 1024px)").matches && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+												const section = document.getElementById("skills")!;
+												window.scrollTo({ top: section.offsetTop + (section.offsetHeight - innerHeight) * index / (skillGroups.length - 1), behavior: "instant" });
+											}
+										}}
 										className={`group relative w-full overflow-hidden rounded-2xl border p-4 text-left transition-all duration-500 cursor-pointer md:p-5 ${
 											isActive
 												? "border-perfume-primary bg-perfume-surface shadow-md"
@@ -246,7 +253,7 @@ export default function TechStackSection() {
 						</div>
 
 						{/* Active Ingredient */}
-						<div className="lg:col-span-7">
+						<div className="lg:col-span-7" data-note-anchor="skill-panel">
 							<AnimatePresence mode="wait">
 								<motion.div
 									key={activeGroup.id}

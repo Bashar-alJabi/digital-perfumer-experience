@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import React from "react";
 
 // Key statistics highlighting real-world impact
@@ -14,7 +14,6 @@ import React from "react";
 export default function AboutSection() {
 	return (
 		<section
-			id="about"
 			className="relative py-28 md:py-36 px-6 md:px-12 bg-perfume-bg text-perfume-text overflow-hidden border-t border-perfume-soft/40"
 		>
 			{/* Background Glow */}
@@ -22,6 +21,7 @@ export default function AboutSection() {
 
 			<div className="max-w-7xl mx-auto relative z-10">
 				{/* Header Badge */}
+				<div data-note-anchor="core" className="about-note-core" aria-hidden="true" />
 				<div className="flex items-center gap-3 mb-8">
 					<span className="w-1.5 h-1.5 rounded-full bg-perfume-primary" />
 					<span className="dp-label uppercase tracking-[0.4em] text-perfume-text/60">

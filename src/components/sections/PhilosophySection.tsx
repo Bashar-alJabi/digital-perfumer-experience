@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 
 const notes = [
 	{
@@ -68,13 +68,7 @@ export default function PhilosophySection() {
 						{notes.map((note, cardIndex) => (
 							<motion.div
 								key={note.number}
-								initial={{ opacity: 0, y: 40 }}
-								whileInView={{ opacity: 1, y: 0 }}
-								viewport={{ once: true }}
-								transition={{
-									duration: 0.8,
-									delay: cardIndex * 0.15,
-								}}
+								data-note-card
 								className="relative overflow-hidden rounded-3xl border border-perfume-soft bg-perfume-surface p-8 shadow-sm transition-colors duration-500 hover:border-perfume-primary/30 md:p-12"
 							>
 								{/* Background Number */}
@@ -82,7 +76,7 @@ export default function PhilosophySection() {
 									{note.number}
 								</div>
 
-								<div className="relative z-10">
+								<div className="relative z-10 note-card-content">
 									{/* Signature Dots */}
 									<div className="mb-8 flex items-center gap-4">
 										{signatureDots.map((dot, dotIndex) => {
@@ -91,6 +85,7 @@ export default function PhilosophySection() {
 											return (
 												<span
 													key={dot.title}
+													data-note-anchor={isActive ? `philosophy-${cardIndex}` : undefined}
 													title={dot.title}
 													className={`h-3 w-3 rounded-full transition-all duration-500 ${
 														dot.baseClass

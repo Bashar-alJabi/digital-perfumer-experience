@@ -1,3 +1,4 @@
+import ThreeNotesProvider from "@/components/three-notes/ThreeNotesProvider";
 import CustomCursor from "@/components/cursor/CustomCursor";
 import Footer from "@/components/layout/Footer";
 import LoadingScreen from "@/components/layout/LoadingScreen";
@@ -16,7 +17,9 @@ import TechStackSection from "@/components/sections/TechStackSection";
 export default function Home() {
 	return (
 		<main className="min-h-screen bg-perfume-bg text-perfume-text selection:bg-perfume-primary selection:text-white">
+			<ThreeNotesProvider>
 			<LoadingScreen />
+			<noscript><style>{`.notes-loader { display: none !important; }`}</style></noscript>
 			<CustomCursor />
 			<ScrollPerfumeBottle />
 			{/* Floating Capsule Navbar */}
@@ -59,6 +62,7 @@ export default function Home() {
 			</section>
 			{/* Footer Component */}
 			<Footer />
+			</ThreeNotesProvider>
 		</main>
 	);
 }

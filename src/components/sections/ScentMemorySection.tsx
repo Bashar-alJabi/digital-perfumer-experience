@@ -1,46 +1,33 @@
 "use client";
 
-import { motion, useScroll, useTransform } from "framer-motion";
+import { useChapterProgress } from "@/components/three-notes/ThreeNotesProvider";
+import { memoryOpacity } from "@/lib/three-notes/score";
+import { motion, useTransform } from "motion/react";
 import { useRef } from "react";
 
 export default function ScentMemorySection() {
 	const sectionRef = useRef<HTMLElement>(null);
 
-	const { scrollYProgress } = useScroll({
-		target: sectionRef,
-		offset: ["start end", "end start"],
-	});
+	const scrollYProgress = useChapterProgress("memory");
 
 	// Statement 01 — enters, stays readable, then leaves.
-	const seenOpacity = useTransform(
-		scrollYProgress,
-		[0.08, 0.2, 0.38, 0.46],
-		[0, 1, 1, 0],
-	);
+	const seenOpacity = useTransform(scrollYProgress, p => memoryOpacity(0, p));
 
-	const seenY = useTransform(scrollYProgress, [0.08, 0.2, 0.46], [45, 0, -35]);
+	const seenY = useTransform(scrollYProgress, [0.02, 0.08, 0.32], [35, 0, -25]);
 
 	// Statement 02 — gets more time on screen.
-	const rememberedOpacity = useTransform(
-		scrollYProgress,
-		[0.4, 0.5, 0.66, 0.74],
-		[0, 1, 1, 0],
-	);
+	const rememberedOpacity = useTransform(scrollYProgress, p => memoryOpacity(1, p));
 
 	const rememberedY = useTransform(
 		scrollYProgress,
-		[0.4, 0.5, 0.74],
+		[0.34, 0.4, 0.64],
 		[45, 0, -35],
 	);
 
 	// Final statement — stays visible until the section ends.
-	const differenceOpacity = useTransform(
-		scrollYProgress,
-		[0.62, 0.72, 1],
-		[0, 1, 1],
-	);
+	const differenceOpacity = useTransform(scrollYProgress, p => memoryOpacity(2, p));
 
-	const differenceY = useTransform(scrollYProgress, [0.62, 0.72], [40, 0]);
+	const differenceY = useTransform(scrollYProgress, [0.66, 0.72], [35, 0]);
 
 	return (
 		<section
@@ -56,7 +43,7 @@ export default function ScentMemorySection() {
 								opacity: seenOpacity,
 								y: seenY,
 							}}
-							className="absolute inset-0 flex flex-col justify-center"
+							className="memory-statement absolute inset-0 flex flex-col justify-center"
 						>
 							<p className="dp-label mb-8 uppercase tracking-[0.4em] text-perfume-primary">
 								Scent Memory
@@ -77,7 +64,7 @@ export default function ScentMemorySection() {
 								opacity: rememberedOpacity,
 								y: rememberedY,
 							}}
-							className="absolute inset-0 flex flex-col justify-center"
+							className="memory-statement absolute inset-0 flex flex-col justify-center"
 						>
 							<p className="dp-label mb-8 uppercase tracking-[0.4em] text-perfume-primary">
 								Scent Memory
@@ -98,7 +85,7 @@ export default function ScentMemorySection() {
 								opacity: differenceOpacity,
 								y: differenceY,
 							}}
-							className="absolute inset-0 flex flex-col justify-center"
+							className="memory-statement absolute inset-0 flex flex-col justify-center"
 						>
 							<p className="dp-label mb-8 uppercase tracking-[0.4em] text-perfume-primary">
 								The Difference
