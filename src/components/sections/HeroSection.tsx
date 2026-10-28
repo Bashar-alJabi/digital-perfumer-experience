@@ -4,7 +4,7 @@ import HeroCanvas from "@/components/canvas/HeroCanvas";
 import gsap from "gsap";
 import React, { useEffect, useRef } from "react";
 
-export default function HeroSection() {
+export default function HeroSection({ cinematic = false }: { cinematic?: boolean }) {
 	const containerRef = useRef<HTMLDivElement>(null);
 	const titleRef = useRef<HTMLHeadingElement>(null);
 	const taglineRef = useRef<HTMLParagraphElement>(null);
@@ -69,7 +69,7 @@ export default function HeroSection() {
 			className="relative w-full h-screen flex flex-col justify-between items-center px-6 py-12 bg-perfume-bg text-perfume-text overflow-hidden select-none"
 		>
 			{/* 3D Fluid Canvas Background */}
-			<HeroCanvas />
+			{!cinematic && <HeroCanvas />}
 
 			{/* Spacer for vertical balance */}
 			<div className="w-full h-12" />

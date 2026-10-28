@@ -79,6 +79,7 @@ export default function LoadingScreen() {
 					delay: 0.5,
 					onComplete: () => {
 						container.style.display = "none";
+						window.dispatchEvent(new Event("dp:loader-handoff"));
 						document.body.style.overflow = "";
 					},
 				});
@@ -312,6 +313,7 @@ export default function LoadingScreen() {
 			 * PHASE 8
 			 * Logo dissolves into the website.
 			 */
+			tl.call(() => window.dispatchEvent(new Event("dp:loader-handoff")));
 			tl.to(dust, {
 				opacity: 0,
 				scale: 0,
@@ -338,6 +340,7 @@ export default function LoadingScreen() {
 					},
 					"-=0.45",
 				);
+			tl.timeScale(1.35);
 		}, container);
 
 		return () => {
