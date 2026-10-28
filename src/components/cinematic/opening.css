@@ -60,3 +60,19 @@
   #philosophy .philosophy-morph-stage{position:sticky!important;top:0!important;height:100vh!important;max-height:100vh!important}
   #philosophy .philosophy-morph-card{backface-visibility:hidden;transform-style:preserve-3d}
 }
+
+/* The single presentation card has a deliberate clear landing strip below it.
+   The three 3D notes collect in that strip before handing off to Formula. */
+@media(min-width:768px) and (prefers-reduced-motion:no-preference){
+  .philosophy-morph-slot{height:min(74vh,660px)!important;padding-bottom:68px!important;box-sizing:border-box}
+  .philosophy-morph-card{margin-top:-48px!important}
+  .philosophy-manifesto>p{
+    opacity:var(--manifesto-progress,0);
+    transform:translate3d(0,calc((1 - var(--manifesto-progress,0))*-22px),calc((1 - var(--manifesto-progress,0))*-60px));
+  }
+  .philosophy-manifesto>h2{
+    opacity:var(--manifesto-progress,0);
+    transform:perspective(1100px) translate3d(0,calc((1 - var(--manifesto-progress,0))*48px),calc((1 - var(--manifesto-progress,0))*-155px)) rotateX(calc((1 - var(--manifesto-progress,0))*13deg));
+    transform-origin:40% 50%;
+  }
+}
