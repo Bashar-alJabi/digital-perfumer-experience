@@ -1,333 +1,54 @@
-/* The original portfolio stays the content authority. This scene is a restrained optical layer. */
-#home{--opening-progress:0}
-#home>section{background:transparent!important;isolation:isolate;perspective:1400px}
-#home .opening-world{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none;background:radial-gradient(ellipse 50% 65% at 50% 68%,#fbd5e1 0%,#ffeff5 68%,#fff8fa 100%)}
-.opening-world canvas{position:absolute!important;inset:0;pointer-events:none}
-.opening-ambient{position:absolute;inset:0;background:radial-gradient(ellipse 24% 28% at 78% 25%,#fff9fbd9,transparent 80%),radial-gradient(ellipse 39% 35% at 13% 71%,#fca9c43e,transparent 85%)}
-.opening-vignette{position:absolute;inset:0;background:linear-gradient(180deg,#ffeff560,transparent 30%,transparent 70%,#ffeff5c5)}
-#home .opening-copy{position:relative;z-index:3;transform-style:preserve-3d;will-change:transform,opacity;transform:perspective(1200px) translate3d(0,calc(var(--opening-progress) * -110px),calc(var(--opening-progress) * 160px)) rotateX(calc(var(--opening-progress) * -11deg));opacity:calc(1 - var(--opening-progress) * 1.14);text-shadow:0 2px 22px #fff4f9d8}
-#home .opening-dots{transform:translateY(calc(var(--opening-progress) * -35px)) scale(calc(1 - var(--opening-progress) * .45));opacity:calc(1 - var(--opening-progress) * 1.2)}
-#home .opening-cta{transition:opacity .25s ease}
-#philosophy{perspective:1450px}
-#philosophy .space-y-8>div{transform-style:preserve-3d;backface-visibility:hidden;box-shadow:0 25px 72px #9a4f7220;transition:box-shadow .3s ease,border-color .3s ease}
-#philosophy .space-y-8>div:hover{box-shadow:0 35px 80px #9a4f7233}
-@media(max-width:767px){#home .opening-world{opacity:.62}#home .opening-copy{transform:none!important;opacity:1!important}#home .opening-dots{transform:none!important;opacity:1!important}}
-@media(prefers-reduced-motion:reduce){#home .opening-copy,#home .opening-dots{transform:none!important;opacity:1!important}#home .opening-world{display:none}}
-
-/* ONE CAMERA STAGE, NOT A PAGE-SCROLL REVEAL:
-   Hero stays pinned while the wheel drives its original copy out in depth.
-   Philosophy overlaps the same viewport; all later sections retain their original flow. */
-#home{height:180vh;--opening-world-visibility:1;position:relative}
-#home>section{position:sticky;top:0;perspective:none;isolation:auto}
+/* HERO: original particle background retained, R3F world above it. */
+#home{--opening-progress:0;--opening-world-visibility:1;height:180vh;position:relative}
+#home>section{position:sticky;top:0;background:transparent!important;isolation:auto}
 #home .opening-original-background{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.88}
-#home .opening-original-background>div,#home .opening-original-background canvas{pointer-events:none!important}
-#home .opening-world{position:fixed;inset:0;z-index:1;opacity:var(--opening-world-visibility);background:transparent;transition:opacity .16s linear}
-#home .opening-world canvas{position:absolute!important}
-#home .opening-ambient{background:radial-gradient(ellipse 55% 45% at 50% 65%,#f6a8bf12,transparent 78%);pointer-events:none}
-#home .opening-vignette{background:radial-gradient(ellipse 90% 75% at 50% 55%,transparent 60%,#ffeff545 100%)}
-#home .opening-copy{transform:perspective(1400px) translate3d(0,calc(var(--opening-progress) * -160px),calc(var(--opening-progress) * 220px)) rotateX(calc(var(--opening-progress) * -16deg));opacity:clamp(0,calc(1 - var(--opening-progress) * 1.9),1)}
-#philosophy{position:relative;z-index:2;margin-top:-36vh;padding-top:40vh;background:transparent;isolation:isolate;--philosophy-progress:0}
-#philosophy>div{position:relative;z-index:2}
-#philosophy .lg\\:sticky h2{transform-origin:50% 50%;transform:perspective(1300px) translate3d(0,calc((1 - var(--philosophy-progress)) * 80px),calc((1 - var(--philosophy-progress)) * -220px)) rotateX(calc((1 - var(--philosophy-progress)) * 16deg));opacity:clamp(.15,var(--philosophy-progress),1)}
-#philosophy .space-y-8>div>.relative{transform:perspective(1100px) translate3d(0,calc((1 - var(--cn-card-appear,0)) * 46px),calc((1 - var(--cn-card-appear,0)) * -110px)) rotateY(calc((1 - var(--cn-card-appear,0)) * -9deg));opacity:clamp(.15,var(--cn-card-appear,1),1);transition:transform .12s linear,opacity .12s linear}
-#philosophy .space-y-8>div{border-color:rgba(243,99,113,calc(.16 + var(--cn-card-appear,0) * .3));}
-@media(max-width:767px){
-  #home{height:135vh}
-  #philosophy{margin-top:-14vh;padding-top:20vh}
-  #home .opening-original-background{opacity:.8}
-  #home .opening-world{opacity:calc(var(--opening-world-visibility) * .72)}
-  #home .opening-copy{transform:perspective(1000px) translate3d(0,calc(var(--opening-progress) * -65px),calc(var(--opening-progress) * 60px));opacity:clamp(0,calc(1 - var(--opening-progress) * 1.3),1)}
-}
-@media(prefers-reduced-motion:reduce){
-  #home{height:auto}
-  #home>section{position:relative}
-  #philosophy{margin-top:0;padding-top:8rem}
-  #philosophy .lg\\:sticky h2,#philosophy .space-y-8>div>.relative{transform:none!important;opacity:1!important}
-}
-
-/* One deliberately drawn digital signature. Lines connect actual note markers;
-   never float independently and never intercept card interactions. */
-#philosophy .philosophy-connection{
-  position:fixed;inset:0;width:100vw;height:100vh;overflow:visible;
-  pointer-events:none;z-index:3;fill:none;
-}
-#philosophy .philosophy-connection path{
-  stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;
-  vector-effect:non-scaling-stroke;filter:drop-shadow(0 0 5px rgba(243,99,113,.2));
-}
-@media (prefers-reduced-motion:reduce){
-  #philosophy .philosophy-connection{display:none}
-}
-
-/* Fixed thread coordinates are viewport-relative; avoid a perspective containing block. */
-#philosophy{perspective:none}
-
-/* PHILOSOPHY — a deliberate hand-off from the Hero, not a second unrelated page.
-   The line is local to the section so its path and card anchors share coordinates.
-   The end of the last strand leads into the actual Formula section below. */
-#philosophy .philosophy-connection{
-  position:absolute;inset:0;width:100%;height:100%;
-  overflow:visible;z-index:1;pointer-events:none;display:block;
-}
-#philosophy .philosophy-connection path{
-  stroke-width:1.65;stroke-linecap:round;stroke-linejoin:round;fill:none;
-  filter:drop-shadow(0 0 4px rgba(243,99,113,.18));
-}
-#philosophy .space-y-8>div{
-  position:relative;z-index:2;
-  box-shadow:0 18px 56px rgba(113,45,71,.07),0 0 calc(var(--cn-note-highlight,0) * 30px) rgba(243,99,113,.14);
-  border-color:rgba(243,99,113,calc(.2 + var(--cn-note-highlight,0) * .34));
-  transition:box-shadow .25s ease,border-color .25s ease;
-}
-#philosophy .space-y-8>div.cn-note-illuminated{
-  box-shadow:0 22px 70px rgba(113,45,71,.1),0 0 30px rgba(243,99,113,.12);
-}
-#philosophy .space-y-8>div>.relative{transform-origin:50% 45%}
-#philosophy :is(h2,h3,p){-webkit-font-smoothing:antialiased}
+#home .opening-original-background canvas{pointer-events:none!important}
+#home .opening-world{position:fixed;inset:0;z-index:1;overflow:hidden;pointer-events:none;opacity:var(--opening-world-visibility);background:transparent}
+.opening-world canvas{position:absolute!important;inset:0;pointer-events:none}
+.opening-ambient{position:absolute;inset:0;background:radial-gradient(ellipse 55% 45% at 50% 65%,#f6a8bf12,transparent 78%)}
+.opening-vignette{position:absolute;inset:0;background:radial-gradient(ellipse 90% 75% at 50% 55%,transparent 60%,#ffeff545)}
+#home .opening-copy{position:relative;z-index:3;transform:perspective(1400px) translate3d(0,calc(var(--opening-progress) * -160px),calc(var(--opening-progress) * 220px)) rotateX(calc(var(--opening-progress) * -16deg));opacity:clamp(0,calc(1 - var(--opening-progress) * 1.9),1);text-shadow:0 2px 22px #fff4f9d8}
+#home .opening-dots{transform:translateY(calc(var(--opening-progress) * -35px)) scale(calc(1 - var(--opening-progress) * .45));opacity:clamp(0,calc(1 - var(--opening-progress) * 1.2),1)}
+/* PHILOSOPHY: single slot, not stacked cards; card's origin is a circle. */
+#philosophy{height:430vh;position:relative;z-index:2;margin-top:-12vh;isolation:isolate;--morph-progress:0}
+#philosophy>.philosophy-morph-section{height:100%;padding:0;background:transparent}
+.philosophy-morph-stage{position:sticky;top:0;height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.philosophy-morph-layout{width:min(1300px,94vw);display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:clamp(42px,7vw,120px);align-items:center;padding:80px 30px}
+.philosophy-manifesto{position:relative;transform:perspective(1450px) translate3d(calc(var(--manifesto-depth,0) * -90px),calc(var(--manifesto-depth,0) * 30px),calc(var(--manifesto-depth,0) * -240px)) rotateY(calc(var(--manifesto-depth,0) * 15deg));opacity:clamp(.2,calc(1 - var(--manifesto-depth,0) * .75),1);transform-origin:30% 50%}
+.philosophy-morph-slot{height:min(67vh,580px);min-height:420px;position:relative;display:flex;align-items:center;justify-content:center;perspective:1300px}
+.philosophy-morph-card{--morph-open:0;--morph-text:0;--morph-visibility:0;position:absolute;width:min(100%,580px);min-height:395px;isolation:isolate;overflow:hidden;border:1px solid #ffffff77;padding:clamp(28px,3.6vw,52px);border-radius:28px;box-shadow:0 30px 90px rgba(83,33,55,.16);opacity:var(--morph-visibility);transform:perspective(1400px) translate3d(0,calc((1 - var(--morph-open)) * 25px),calc((1 - var(--morph-open)) * 70px)) rotateY(calc((1 - var(--morph-open)) * -18deg));clip-path:circle(calc(4.5% + var(--morph-open) * 120%) at 50% 50%);will-change:clip-path,transform;background:var(--morph-bg);pointer-events:none}
+.philosophy-morph-card.note-top{--morph-bg:radial-gradient(ellipse at 35% 15%,#ffe0e7,#f8a4b5 52%,#eb6c80);--ink:#321e27}
+.philosophy-morph-card.note-heart{--morph-bg:radial-gradient(ellipse at 30% 15%,#fffafd,#ffe3ec 52%,#f5b1c8);--ink:#30212a}
+.philosophy-morph-card.note-base{--morph-bg:radial-gradient(ellipse at 30% 10%,#6d515c,#33252e 60%,#1b1920);--ink:#fff1f6}
+.philosophy-morph-body{position:relative;color:var(--ink);opacity:var(--morph-text);transform:perspective(1100px) translate3d(0,calc((1 - var(--morph-text)) * 42px),calc((1 - var(--morph-text)) * -130px)) rotateX(calc((1 - var(--morph-text)) * 15deg));filter:blur(calc((1 - var(--morph-text)) * 3px));}
+.philosophy-morph-body h3,.philosophy-morph-body p{color:var(--ink)}
+.philosophy-morph-number{position:absolute;right:-12px;top:-58px;font-size:130px;opacity:.13;font-family:serif}
+.philosophy-note-dots{display:flex;gap:12px;margin-bottom:28px}
+.philosophy-note-dots span{width:12px;height:12px;border-radius:50%;background:#f36371}
+.philosophy-note-dots span:nth-child(2){background:#ffc3d3}
+.philosophy-note-dots span:nth-child(3){background:#262029}
 #formula{position:relative;z-index:2}
 @media(max-width:767px){
-  #philosophy .philosophy-connection{opacity:.55}
-  #philosophy .space-y-8>div>.relative{
-    transform:translateY(calc((1 - var(--cn-card-appear,0)) * 24px));
-    opacity:clamp(.3,var(--cn-card-appear,1),1);
-  }
+  #home{height:135vh}
+  #home .opening-world{opacity:calc(var(--opening-world-visibility) * .7)}
+  #home .opening-copy{transform:translateY(calc(var(--opening-progress) * -50px));opacity:clamp(0,calc(1 - var(--opening-progress) * 1.2),1)}
+  #philosophy{height:auto;margin-top:0}
+  #philosophy>.philosophy-morph-section{height:auto;padding:80px 24px}
+  .philosophy-morph-stage{position:relative;height:auto;overflow:visible}
+  .philosophy-morph-layout{display:flex;flex-direction:column;gap:48px;padding:0;width:100%}
+  .philosophy-manifesto{transform:none;opacity:1}
+  .philosophy-morph-slot{height:auto;min-height:0;display:flex;flex-direction:column;gap:24px;width:100%}
+  .philosophy-morph-card{position:relative;width:100%;min-height:0;opacity:1;clip-path:none;transform:none}
+  .philosophy-morph-body{opacity:1;transform:none;filter:none}
 }
 @media(prefers-reduced-motion:reduce){
-  #philosophy .philosophy-connection{display:none}
-  #philosophy .space-y-8>div{transition:none}
-}
-
-/* Directed depth reveal — the actual content plane assembles in camera space.
-   Separate the card shell from its contents so text stays sharply legible. */
-@media(min-width:768px) and (prefers-reduced-motion:no-preference){
-  #philosophy .space-y-8>div>.relative{
-    transform:perspective(1300px)
-      translate3d(calc(var(--cn-depth,0) * 80px),calc(var(--cn-depth,0) * 86px),calc(var(--cn-depth,0) * -260px))
-      rotateY(calc(var(--cn-depth,0) * -18deg))
-      rotateX(calc(var(--cn-depth,0) * 12deg))!important;
-    opacity:clamp(0,calc(1 - var(--cn-depth,0) * 1.35),1)!important;
-    filter:blur(calc(var(--cn-depth,0) * 2px));
-    transform-origin:20% 50%;
-    will-change:transform,opacity;
-  }
-  #philosophy .space-y-8>div{
-    transform:perspective(1450px)
-      translate3d(calc(var(--cn-depth,0) * 46px),calc(var(--cn-depth,0) * 36px),calc(var(--cn-depth,0) * -155px))
-      rotateY(calc(var(--cn-depth,0) * -8deg))!important;
-    opacity:clamp(.03,calc(1 - var(--cn-depth,0) * 1.55),1)!important;
-    transition:box-shadow .2s linear,border-color .2s linear!important;
-    transform-origin:15% 45%;
-  }
-  #philosophy .space-y-8>div:nth-child(2){
-    transform-origin:80% 45%;
-  }
-  #philosophy .space-y-8>div:nth-child(3){
-    transform-origin:40% 45%;
-  }
-}
-
-/* V3 philosophy stage: one 3D note physically unfolds into its content plane.
- * These rules intentionally override the older paragraph-only animations. */
-@media(min-width:768px) and (prefers-reduced-motion:no-preference){
-  #philosophy{
-    height:390vh!important;
-    min-height:390vh;
-    padding:0!important;
-    margin-top:-15vh;
-    isolation:isolate;
-    perspective:none!important;
-  }
-  #philosophy .philosophy-inner{
-    position:sticky;top:0;height:100vh;max-width:1400px;
-    display:flex;align-items:center;padding:7vh 4vw;
-  }
-  #philosophy .philosophy-inner>.grid{
-    width:100%;height:100%;align-items:center;
-    grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);
-    gap:min(9vw,125px);
-  }
-  #philosophy .philosophy-manifesto{
-    position:relative;top:auto;
-    transform-origin:45% 48%;
-    transform:perspective(1450px) translate3d(calc(var(--manifesto-depth,0) * -65px),calc(var(--manifesto-depth,0) * 40px),calc(var(--manifesto-depth,0) * -250px)) rotateY(calc(var(--manifesto-depth,0) * 15deg))!important;
-    opacity:clamp(.25,calc(1 - var(--manifesto-depth,0) * .82),1)!important;
-    filter:blur(calc(var(--manifesto-depth,0) * 2.5px));
-    will-change:transform,opacity;
-  }
-  #philosophy .philosophy-notes{
-    position:relative;display:grid;place-items:center;
-    height:min(71vh,680px);min-height:450px;
-    perspective:1450px;
-  }
-  #philosophy .note-morph-card{
-    --note-unfold:0;--note-text:0;--note-sphere:1;
-    position:absolute!important;
-    inset:auto!important;
-    width:min(100%,570px);min-height:380px;
-    padding:clamp(28px,3.1vw,50px)!important;
-    margin:0!important;
-    border:1px solid rgba(243,99,113,.25);
-    border-radius:calc((1 - var(--note-unfold)) * 48% + var(--note-unfold) * 24px)!important;
-    background:transparent!important;
-    overflow:hidden;isolation:isolate;
-    transform-origin:50% 50%!important;
-    transform:perspective(1350px)
-      translate3d(0,calc((1 - var(--note-unfold)) * 18px),calc((1 - var(--note-unfold)) * 135px))
-      rotateY(calc((1 - var(--note-unfold)) * -22deg))
-      scale(calc(.13 + var(--note-unfold) * .87))!important;
-    opacity:1!important;
-    filter:none!important;
-    box-shadow:0 35px 90px rgba(87,33,60,.12),inset 0 2px 4px rgba(255,255,255,.55)!important;
-    transition:none!important;
-    will-change:transform,border-radius;
-    pointer-events:none;
-  }
-  #philosophy .note-morph-card[data-note-active="true"]{pointer-events:auto}
-  #philosophy .note-morph-card::before{
-    content:"";position:absolute;inset:0;z-index:-1;opacity:1;
-    background:var(--note-color);
-  }
-  #philosophy .note-morph-card:nth-child(1){
-    --note-color:radial-gradient(ellipse at 29% 18%,#ffe0e7 0%,#f9a7b5 40%,#ed7186 100%);
-    --note-ink:#311b25;
-  }
-  #philosophy .note-morph-card:nth-child(2){
-    --note-color:radial-gradient(ellipse at 27% 14%,#fffafd 0%,#ffe1e8 49%,#f7b9ce 100%);
-    --note-ink:#2a2025;
-  }
-  #philosophy .note-morph-card:nth-child(3){
-    --note-color:radial-gradient(ellipse at 25% 15%,#705760 0%,#35262e 58%,#17161c 100%);
-    --note-ink:#fff2f5;
-  }
-  #philosophy .note-morph-card .note-morph-content{
-    transform:perspective(900px) translate3d(0,calc((1 - var(--note-text)) * 34px),calc((1 - var(--note-text)) * -65px)) rotateX(calc((1 - var(--note-text)) * 11deg))!important;
-    opacity:clamp(0,calc(var(--note-text) * 1.3),1)!important;
-    filter:blur(calc((1 - var(--note-text)) * 4px));
-    color:var(--note-ink);
-    transition:none!important;
-  }
-  #philosophy .note-morph-card .note-morph-content :is(h3,p){
-    color:var(--note-ink)!important;
-    text-shadow:none!important;
-  }
-  #philosophy .note-morph-card .note-morph-content .dp-small{
-    opacity:.78;
-  }
-  #philosophy .note-morph-card .note-morph-number{
-    opacity:calc(var(--note-text) * .22);
-    color:var(--note-ink)!important;
-  }
-  #philosophy .note-morph-card .note-morph-dots{
-    opacity:var(--note-text);
-  }
-  #philosophy .philosophy-connection{display:none!important}
-}
-@media(max-width:767px){
-  #philosophy .philosophy-connection{display:none!important}
-  #philosophy .note-morph-card{
-    transform:none!important;opacity:1!important;
-    background:var(--note-color,#fff6f8)!important;
-    border-radius:24px!important;
-  }
-  #philosophy .note-morph-card:nth-child(1){--note-color:#f9b7c3}
-  #philosophy .note-morph-card:nth-child(2){--note-color:#ffe2e9}
-  #philosophy .note-morph-card:nth-child(3){--note-color:#302630}
-  #philosophy .note-morph-card:nth-child(3) :is(h3,p){color:#fff2f5!important}
-  #philosophy .note-morph-card .note-morph-content{transform:none!important;opacity:1!important;filter:none!important}
-}
-@media(prefers-reduced-motion:reduce){
-  #philosophy .philosophy-connection{display:none!important}
-  #philosophy .note-morph-card{transform:none!important;opacity:1!important;background:var(--note-color,#fff6f8)!important}
-  #philosophy .note-morph-card .note-morph-content{transform:none!important;opacity:1!important;filter:none!important}
-  #philosophy .philosophy-manifesto{transform:none!important;opacity:1!important;filter:none!important}
-}
-
-/* One sculpted note at a time; other notes are absent, not stacked in the same place. */
-@media(min-width:768px) and (prefers-reduced-motion:no-preference){
-  #philosophy .note-morph-card{opacity:var(--note-presence,0)!important;visibility:visible!important;}
-  #philosophy .note-morph-card:not([data-note-active="true"]){pointer-events:none}
-}
-
-/* Root #philosophy wraps the actual PhilosophySection; the inner section must
-   span the scroll runway or sticky content would unpin halfway through. */
-@media(min-width:768px) and (prefers-reduced-motion:no-preference){
-  #philosophy>section{height:100%;min-height:0;padding:0!important;overflow:visible!important;}
-}
-
-/* Explicit single-active-card gate. Later DOM siblings are never allowed to
-   cover Top or Heart; the scroll clock owns all visibility. */
-@media(min-width:768px) and (prefers-reduced-motion:no-preference){
-  #philosophy .note-morph-card{
-    opacity:var(--note-visible,0)!important;
-    transition:none!important;
-  }
-  #philosophy .note-morph-card .note-morph-content{
-    opacity:var(--note-text,0)!important;
-  }
-}
-
-/* Final in-flow choreography. Earlier sticky/stacking overrides are intentionally
-   neutralized. The original three notes are THREE DISTINCT VERTICAL CARDS. */
-@media(min-width:768px) and (prefers-reduced-motion:no-preference){
-  #philosophy{
-    height:auto!important;min-height:0!important;
-    margin-top:-10vh!important;
-    padding:12vh 0 8vh!important;
-    perspective:none!important;
-  }
-  #philosophy>section{
-    height:auto!important;min-height:0!important;
-    padding:7rem 3rem 10rem!important;
-  }
-  #philosophy .philosophy-inner{
-    position:relative!important;top:auto!important;
-    display:block!important;height:auto!important;
-    max-width:1280px!important;padding:0!important;
-  }
-  #philosophy .philosophy-inner>.grid{
-    display:grid!important;height:auto!important;
-    grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
-    align-items:start!important;gap:clamp(40px,7vw,110px)!important;
-  }
-  #philosophy .philosophy-manifesto{
-    position:sticky!important;top:24vh!important;
-    transform:perspective(1400px) translate3d(0,calc(var(--manifesto-depth,0) * 52px),calc(var(--manifesto-depth,0) * -190px)) rotateY(calc(var(--manifesto-depth,0) * -12deg))!important;
-    opacity:clamp(.2,calc(1 - var(--manifesto-depth,0) * .8),1)!important;
-    filter:blur(calc(var(--manifesto-depth,0) * 2px));
-  }
-  #philosophy .philosophy-notes{
-    display:flex!important;flex-direction:column!important;
-    gap:clamp(32px,5vw,70px)!important;
-    position:relative!important;height:auto!important;min-height:0!important;
-    perspective:1200px;
-  }
-  #philosophy .note-morph-card,
-  #philosophy .note-morph-card:nth-child(n){
-    --note-unfold:0;--note-text:0;
-    position:relative!important;display:block!important;
-    inset:auto!important;
-    flex-shrink:0!important;
-    width:100%!important;min-height:360px!important;
-    margin:0!important;padding:clamp(30px,3vw,46px)!important;
-    opacity:1!important;visibility:visible!important;
-    border-radius:28px!important;
-    transform:perspective(1200px) translateZ(calc((1 - var(--note-unfold)) * -110px)) rotateY(calc((1 - var(--note-unfold)) * -9deg))!important;
-    transform-origin:50% 50%!important;
-    /* A genuine round aperture expands into the EXISTING card silhouette. */
-    clip-path:circle(calc(5% + var(--note-unfold) * 145%) at 50% 49%);
-    background:var(--note-color)!important;
-    box-shadow:0 24px 65px rgba(74,29,48,.13)!important;
-    filter:none!important;z-index:auto!important;
-    transition:none!important;
-    pointer-events:auto!important;
-  }
-  #philosophy .note-morph-card::before{
-    background:radial-gradient(circle at 37% 30%,rgba(255,255,255,.42),transparent 55%)!important;
-    z-index:0!important;opacity:calc(1 - var(--note-unfold))!important;
-  }
-  #philosophy .note-morph-card .note-morph-content{
-    transform:perspective(1000px) translate3d(0,calc((1 - var(--note-text)) * 46px),calc((1 - var(--note-text)) * -110px)) rotateX(calc((1 - var(--note-text)) * 12deg))!important;
-    opacity:var(--note-text,0)!important;filter:blur(calc((1 - var(--note-text)) * 3px))!important;
-  }
-  #philosophy .note-morph-card .note-morph-number{opacity:calc(var(--note-text) * .15)!important}
+  #home{height:auto}#home>section{position:relative}#home .opening-world{display:none}
+  #home .opening-copy,#home .opening-dots{transform:none;opacity:1}
+  #philosophy{height:auto;margin:0}#philosophy>.philosophy-morph-section{height:auto;padding:90px 24px}
+  .philosophy-morph-stage{position:relative;height:auto;overflow:visible}
+  .philosophy-morph-layout{display:flex;flex-direction:column;gap:40px}
+  .philosophy-manifesto{transform:none;opacity:1}
+  .philosophy-morph-slot{height:auto;min-height:0;display:grid;gap:24px}
+  .philosophy-morph-card{position:relative;opacity:1;clip-path:none;transform:none}
+  .philosophy-morph-body{opacity:1;transform:none;filter:none}
 }
