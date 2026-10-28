@@ -27,9 +27,11 @@ export default function PhilosophyStage(){
         const unfold=smooth(-.05,.31,local)*(1-smooth(.67,1.05,local));
         const text=smooth(.14,.43,local)*(1-smooth(.68,.92,local));
         const sphere=1-unfold;
+        const presence=smooth(-.15,.03,local)*(1-smooth(.92,1.07,local));
         card.style.setProperty("--note-unfold",unfold.toFixed(4));
         card.style.setProperty("--note-text",text.toFixed(4));
         card.style.setProperty("--note-sphere",sphere.toFixed(4));
+        card.style.setProperty("--note-presence",presence.toFixed(4));
         card.style.setProperty("--note-phase",clamp(local).toFixed(4));
         card.setAttribute("data-note-active",unfold>.16?"true":"false");
       });
@@ -54,7 +56,7 @@ export default function PhilosophyStage(){
       cancelAnimationFrame(frame);
       window.removeEventListener("scroll",schedule);
       window.removeEventListener("resize",schedule);
-      cards.forEach(card=>{["--note-unfold","--note-text","--note-sphere","--note-phase"].forEach(p=>card.style.removeProperty(p));card.removeAttribute("data-note-active")});
+      cards.forEach(card=>{["--note-unfold","--note-text","--note-sphere","--note-phase","--note-presence"].forEach(p=>card.style.removeProperty(p));card.removeAttribute("data-note-active")});
       section.style.removeProperty("--philosophy-stage");
       heading?.style.removeProperty("--manifesto-depth");
       heading?.style.removeProperty("--manifesto-orbit");
