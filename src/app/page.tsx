@@ -1,3 +1,4 @@
+import CinematicDirector from "@/components/cinematic/CinematicDirector";
 import CustomCursor from "@/components/cursor/CustomCursor";
 import Footer from "@/components/layout/Footer";
 import LoadingScreen from "@/components/layout/LoadingScreen";
@@ -15,7 +16,8 @@ import TechStackSection from "@/components/sections/TechStackSection";
 
 export default function Home() {
 	return (
-		<main className="min-h-screen bg-perfume-bg text-perfume-text selection:bg-perfume-primary selection:text-white">
+		<main className="cinematic-site min-h-screen bg-perfume-bg text-perfume-text selection:bg-perfume-primary selection:text-white">
+			<CinematicDirector />
 			<LoadingScreen />
 			<CustomCursor />
 			<ScrollPerfumeBottle />
@@ -23,7 +25,7 @@ export default function Home() {
 			<Navbar />
 			{/* Hero Section */}
 			<section id="home">
-				<HeroSection />
+				<HeroSection cinematic />
 			</section>
 			{/* Philosophy Section */}
 			<section id="philosophy">
