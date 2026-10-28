@@ -64,7 +64,7 @@ export default function PhilosophySection() {
 					{/* Notes */}
 					<div className="space-y-8 philosophy-notes">
 						{notes.map((note, cardIndex) => (
-							<motion.div
+							<div
 								key={note.number}
 								className="note-morph-card relative overflow-hidden rounded-3xl border border-perfume-soft bg-perfume-surface p-8 shadow-sm md:p-12"
 							>
