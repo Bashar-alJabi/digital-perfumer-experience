@@ -79,6 +79,7 @@ export default function LoadingScreen() {
 					delay: 0.5,
 					onComplete: () => {
 						container.style.display = "none";
+						window.dispatchEvent(new Event("dp:opening-ready"));
 						document.body.style.overflow = "";
 					},
 				});
@@ -312,6 +313,7 @@ export default function LoadingScreen() {
 			 * PHASE 8
 			 * Logo dissolves into the website.
 			 */
+			tl.call(() => window.dispatchEvent(new Event("dp:opening-ready")));
 			tl.to(dust, {
 				opacity: 0,
 				scale: 0,
