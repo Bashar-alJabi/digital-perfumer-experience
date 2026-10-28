@@ -60,6 +60,7 @@ export default function CinematicDirector(){
     if(!main)return;
     const sections=CHAPTERS.map(id=>document.getElementById(id)).filter(Boolean) as HTMLElement[];
     const headings=sections.map(section=>section.querySelector<HTMLElement>("h1, h2"));
+    const details=sections.map(section=>Array.from(section.querySelectorAll<HTMLElement>(".dp-body, .dp-small, h3.dp-card-title")).slice(0,75));
     let frame=0;
     let running=true;
     let currentActive=-1;
@@ -128,6 +129,27 @@ export default function CinematicDirector(){
           heading.style.filter=`blur(${((1-t)*2.4).toFixed(2)}px)`;
         }
       });
+      // Secondary ORIGINAL typography enters in the same 3D camera direction.
+      // Animation is tied to the text's real viewport location, never a duplicate overlay.
+      details.forEach((items,i)=>{
+        if(Math.abs(i-active)>1)return;
+        items.forEach((el,j)=>{
+          const r=el.getBoundingClientRect();
+          if(!r.width||!r.height)return;
+          if(reduced){
+            el.style.removeProperty("transform");
+            el.style.removeProperty("opacity");
+            return;
+          }
+          const appear=smooth(-.12,.43,(h*.9-r.top)/h);
+          const disappear=smooth(-.14,.28,(h*.17-r.bottom)/h);
+          const visible=appear*(1-disappear);
+          const offset=1-appear;
+          const side=j%2?1:-1;
+          el.style.transform=`perspective(950px) translate3d(${(side*24*offset).toFixed(2)}px,${(30*offset-26*disappear).toFixed(2)}px,${(-60*offset-65*disappear).toFixed(2)}px) rotateY(${(side*5*offset).toFixed(2)}deg)`;
+          el.style.opacity=visible.toFixed(3);
+        });
+      });
       // Animate existing note cards, instead of drawing fake 3D UI cards on top.
       const noteCards=visibleElements("#philosophy .space-y-8 > div");
       noteCards.forEach((card,i)=>{
@@ -163,6 +185,7 @@ export default function CinematicDirector(){
       main.style.removeProperty("--cn-dark");
       main.classList.remove("cn-in-memory");
       headings.forEach(el=>{if(!el)return;el.style.removeProperty("transform");el.style.removeProperty("opacity");el.style.removeProperty("filter");});
+      details.flat().forEach(el=>{el.style.removeProperty("transform");el.style.removeProperty("opacity");});
     };
   },[reduced]);
   return <div className="cn-scene" aria-hidden="true">
