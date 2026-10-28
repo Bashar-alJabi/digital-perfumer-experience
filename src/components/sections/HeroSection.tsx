@@ -1,6 +1,6 @@
 "use client";
 
-import HeroCanvas from "@/components/canvas/HeroCanvas";
+import OpeningWorld from "@/components/cinematic/OpeningWorld";
 import gsap from "gsap";
 import React, { useEffect, useRef } from "react";
 
@@ -69,15 +69,15 @@ export default function HeroSection() {
 			className="relative w-full h-screen flex flex-col justify-between items-center px-6 py-12 bg-perfume-bg text-perfume-text overflow-hidden select-none"
 		>
 			{/* 3D Fluid Canvas Background */}
-			<HeroCanvas />
+			<OpeningWorld />
 
 			{/* Spacer for vertical balance */}
 			<div className="w-full h-12" />
 
 			{/* Main Content */}
-			<div className="z-10 text-center max-w-4xl mx-auto flex flex-col items-center my-auto">
+			<div className="opening-copy z-10 text-center max-w-4xl mx-auto flex flex-col items-center my-auto">
 				{/* Fragrance Note Cues */}
-				<div ref={notesRef} className="flex items-center gap-3 mb-6">
+				<div ref={notesRef} className="opening-dots flex items-center gap-3 mb-6">
 					<span
 						className="w-4 h-4 rounded-full bg-perfume-primary shadow-[0_0_12px_rgba(243,99,113,0.5)]"
 						title="Top Note - Head"
