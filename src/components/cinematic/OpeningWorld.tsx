@@ -28,26 +28,12 @@ function Pearl({index,progress,ready,source,targets,blend}:{index:number;progres
     position.x+=(index-1)*exit*.72;
     position.y+=exit*(index===0?1.55:index===1?-.12:-1.65);
     position.z+=exit*(index===0?.4:index===1?-1:.8);
-    // The same sphere approaches the real dot inside its Philosophy card.
-    const target=targets.current[index];
-    if(target&&blend.current>0){
-      const perspective=camera as THREE.PerspectiveCamera;
-      const distance=perspective.position.z-position.z;
-      const halfHeight=Math.tan(THREE.MathUtils.degToRad(perspective.fov*.5))*distance;
-      const halfWidth=halfHeight*perspective.aspect;
-      const x=target[0]*halfWidth+perspective.position.x;
-      const y=-target[1]*halfHeight+perspective.position.y;
-      const amount=0;
-      position.x=THREE.MathUtils.lerp(position.x,x,amount);
-      position.y=THREE.MathUtils.lerp(position.y,y,amount);
-      position.z=THREE.MathUtils.lerp(position.z,2.75,amount);
-    }
     const alpha=1-Math.exp(-delta*5.4);
     root.current.position.lerp(position,alpha);
     source.current[index].copy(root.current.position);
     root.current.rotation.y+=delta*.21;
     root.current.rotation.z=Math.sin(clock.elapsedTime*.34+index)*.11;
-    const philosophyFade=ease(.0,.34,blend.current);
+    const philosophyFade=ease(0,.85,blend.current);
     const scale=(.69+index*.06)*(1-ease(.72,1,p)*.4)*(1-philosophyFade)*ready.current;
     root.current.scale.setScalar(THREE.MathUtils.lerp(root.current.scale.x,scale,alpha));
     if(trail.current){
@@ -124,8 +110,9 @@ export default function OpeningWorld(){
       const rect=hero.getBoundingClientRect();
       const philosophyRect=philosophy.getBoundingClientRect();
       const cards=Array.from(philosophy.querySelectorAll<HTMLElement>(".space-y-8 > div"));
-      const reached=cards.map(card=>{const r=card.getBoundingClientRect();return clamp((innerHeight*.76-r.top)/(innerHeight*.54))});
-      philosophyBlend.current=Math.max(...reached,0);
+      // Fade the original Hero spheres at the stage boundary. The Philosophy
+      // cards become the spheres themselves, so nothing flies behind panels.
+      philosophyBlend.current=clamp((innerHeight*.45-philosophyRect.top)/(innerHeight*.4));
 
       noteTargets.current=cards.map((card,i)=>{
         const marker=card.querySelector<HTMLElement>(`[title="${["Top Note","Heart Note","Base Note"][i]}"]`);
