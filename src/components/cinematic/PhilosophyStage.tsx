@@ -1,81 +1,55 @@
 "use client";
 import { useEffect } from "react";
 
-/** One card at a time, driven by a single reversible scroll timeline.
- * Explicit active index and display prevent the later DOM cards from
- * covering the first card while its sphere is expanding.
+/** Three cards remain in normal document flow. Each card assembles in place,
+ * sequentially, when its own marker enters the cinematic viewport.
  */
 export default function PhilosophyStage(){
   useEffect(()=>{
-    const stage=document.getElementById("philosophy");
-    if(!stage)return;
-    const cards=Array.from(stage.querySelectorAll<HTMLElement>(".note-morph-card"));
-    const manifesto=stage.querySelector<HTMLElement>(".philosophy-manifesto");
-    const reduced=window.matchMedia("(prefers-reduced-motion: reduce)");
+    const section=document.getElementById("philosophy");
+    if(!section)return;
+    const cards=Array.from(section.querySelectorAll<HTMLElement>(".note-morph-card"));
+    const manifesto=section.querySelector<HTMLElement>(".philosophy-manifesto");
+    const reduced=matchMedia("(prefers-reduced-motion: reduce)");
     const clamp=(v:number)=>Math.max(0,Math.min(1,v));
-    const smooth=(a:number,b:number,v:number)=>{
-      const x=clamp((v-a)/(b-a));
-      return x*x*(3-2*x);
-    };
-    let raf=0;
+    const ease=(v:number)=>{const x=clamp(v);return x*x*(3-2*x)};
+    let frame=0;
     const render=()=>{
-      raf=0;
-      const bounds=stage.getBoundingClientRect();
-      const progress=clamp(-bounds.top/Math.max(1,bounds.height-innerHeight));
-      const index=Math.min(2,Math.floor(progress*3));
-      const phase=progress===1?1:progress*3-index;
-      const accessible=reduced.matches || innerWidth<768;
+      frame=0;
+      const h=innerHeight;
+      const mobile=innerWidth<768||reduced.matches;
+      const r=section.getBoundingClientRect();
+      const entered=ease((h*.88-r.top)/(h*.72));
+      section.style.setProperty("--philosophy-stage",entered.toFixed(4));
       cards.forEach((card,i)=>{
-        if(accessible){
-          card.style.removeProperty("display");
-          card.style.removeProperty("opacity");
-          card.style.removeProperty("visibility");
-          card.style.removeProperty("z-index");
-          card.style.setProperty("--note-visible","1");
-          card.style.setProperty("--note-unfold","1");
-          card.style.setProperty("--note-text","1");
-          card.setAttribute("data-note-active","true");
-          return;
-        }
-        const active=i===index;
-        // Exactly one visible card; each has a complete birth, hold and dissolve.
-        const unfold=smooth(.025,.30,phase)*(1-smooth(.79,.99,phase));
-        const text=smooth(.29,.43,phase)*(1-smooth(.72,.91,phase));
-        const presence=smooth(0,.075,phase)*(1-smooth(.92,1,phase));
-        card.style.display=active?"block":"none";
-        card.style.visibility=active?"visible":"hidden";
-        card.style.setProperty("--note-visible",active?String(presence):"0");
-        card.style.zIndex=active?"5":"0";
-        card.style.setProperty("--note-unfold",unfold.toFixed(4));
+        const box=card.getBoundingClientRect();
+        // One ordered stage per card: 0->1. Retain the fully formed previous cards.
+        const t=mobile?1:ease((h*.86-box.top)/(h*.58));
+        const previous=i===0?1:ease((h*.48-cards[i-1].getBoundingClientRect().top)/(h*.55));
+        const progress=i===0?t:Math.min(t,previous);
+        const text=mobile?1:ease((progress-.53)/.33);
+        card.style.setProperty("--note-unfold",progress.toFixed(4));
         card.style.setProperty("--note-text",text.toFixed(4));
-        card.setAttribute("data-note-active",String(active&&unfold>.95));
-      });
-      if(manifesto){
-        const start=smooth(0,.13,progress);
-        const end=smooth(.84,1,progress);
-        const depth=1-start+end;
-        manifesto.style.setProperty("--manifesto-depth",clamp(depth).toFixed(4));
-        manifesto.style.setProperty("--manifesto-orbit",(progress*20).toFixed(2));
-      }
-      stage.style.setProperty("--philosophy-stage",progress.toFixed(4));
-    };
-    const tick=()=>{if(!raf)raf=requestAnimationFrame(render)};
-    tick();
-    window.addEventListener("scroll",tick,{passive:true});
-    window.addEventListener("resize",tick);
-    return()=>{
-      cancelAnimationFrame(raf);
-      window.removeEventListener("scroll",tick);
-      window.removeEventListener("resize",tick);
-      cards.forEach(card=>{
-        for(const key of ["display","visibility","opacity","z-index","--note-unfold","--note-text","--note-visible"]){
-          card.style.removeProperty(key);
-        }
+        card.style.setProperty("--note-visible","1");
+        card.style.removeProperty("display");
+        card.style.removeProperty("visibility");
+        card.style.removeProperty("opacity");
+        card.style.removeProperty("z-index");
         card.removeAttribute("data-note-active");
       });
+      if(manifesto){
+        const depth=mobile?0:1-entered;
+        manifesto.style.setProperty("--manifesto-depth",depth.toFixed(4));
+      }
+    };
+    const tick=()=>{if(!frame)frame=requestAnimationFrame(render)};
+    tick();window.addEventListener("scroll",tick,{passive:true});window.addEventListener("resize",tick);
+    return()=>{
+      cancelAnimationFrame(frame);
+      window.removeEventListener("scroll",tick);window.removeEventListener("resize",tick);
+      cards.forEach(card=>{["--note-unfold","--note-text","--note-visible"].forEach(key=>card.style.removeProperty(key));});
+      section.style.removeProperty("--philosophy-stage");
       manifesto?.style.removeProperty("--manifesto-depth");
-      manifesto?.style.removeProperty("--manifesto-orbit");
-      stage.style.removeProperty("--philosophy-stage");
     };
   },[]);
   return null;
