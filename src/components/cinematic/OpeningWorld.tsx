@@ -8,30 +8,50 @@ import "./opening.css";
 const clamp=(x:number)=>Math.min(1,Math.max(0,x));
 const ease=(a:number,b:number,x:number)=>{const t=clamp((x-a)/(b-a));return t*t*(3-2*t)};
 const COLORS=["#f36371","#ffc3d3","#262029"];
-const curves=[
-  [[-2.4,0.35,0],[-1.6,-.8,.55],[-.25,-.24,1.3],[1.3,.8,.4],[3.2,.24,-.5]],
-  [[-2.7,-1.3,-.4],[-1.1,.25,.5],[0,0,1.4],[1.5,-.35,.4],[3,1,-.6]],
-  [[-2.5,1.2,-.2],[-1.4,1.1,-.6],[.3,-.3,1.4],[1.7,.6,.2],[3,-1.4,-.3]],
-];
-function Filament({index,progress}:{index:number;progress:React.RefObject<number>}){
-  const ref=useRef<THREE.Mesh>(null);
-  const geometry=useMemo(()=>{
-    const path=new THREE.CatmullRomCurve3(curves[index].map(p=>new THREE.Vector3(p[0],p[1],p[2])));
-    return new THREE.TubeGeometry(path,126,.022,6,false);
+/** Three authored digital threads. Each filament starts at the actual 3D sphere,
+ * retains a short history of its movement, and shares its exact signature color.
+ * Unlike decorative tubes, the lines can't drift independently of the spheres.
+ */
+function Filament({index,progress,source}:{index:number;progress:React.RefObject<number>;source:React.RefObject<THREE.Vector3[]>}){
+  const COUNT=56;
+  const history=useRef<THREE.Vector3[]>([]);
+  const line=useMemo(()=>{
+    const geometry=new THREE.BufferGeometry();
+    geometry.setAttribute("position",new THREE.BufferAttribute(new Float32Array(COUNT*3),3));
+    geometry.setDrawRange(0,COUNT);
+    const material=new THREE.LineBasicMaterial({
+      color:COLORS[index],transparent:true,opacity:0,depthWrite:false,
+      blending:THREE.NormalBlending,
+    });
+    return new THREE.Line(geometry,material);
   },[index]);
-  useFrame(({clock})=>{
-    const mesh=ref.current;if(!mesh)return;
-    const p=progress.current;
-    const material=mesh.material as THREE.MeshBasicMaterial;
-    material.opacity=.08+.4*ease(0,.35,p)*(1-ease(.75,1,p));
-    mesh.rotation.z=Math.sin(clock.elapsedTime*.2+index)*.08;
-    mesh.scale.y=.9+Math.sin(clock.elapsedTime*.38+index)*.06;
+  useFrame((_,dt)=>{
+    const head=source.current[index];
+    if(!head)return;
+    const trail=history.current;
+    if(!trail.length){
+      for(let i=0;i<COUNT;i++)trail.push(head.clone());
+    }
+    // Time-based following avoids unstable or jagged trails when scrolling quickly.
+    const follow=1-Math.exp(-Math.min(dt,.05)*11);
+    trail[0].lerp(head,follow);
+    for(let i=1;i<COUNT;i++){
+      const drag=1-Math.exp(-Math.min(dt,.05)*(11-i*.095));
+      trail[i].lerp(trail[i-1],Math.max(.07,drag));
+    }
+    const attr=line.geometry.getAttribute("position") as THREE.BufferAttribute;
+    for(let i=0;i<COUNT;i++){
+      const p=trail[i];
+      attr.setXYZ(i,p.x,p.y,p.z);
+    }
+    attr.needsUpdate=true;
+    const motion=trail[0].distanceTo(trail[COUNT-1]);
+    const section=ease(0,.16,progress.current)*(1-.3*ease(.82,1,progress.current));
+    (line.material as THREE.LineBasicMaterial).opacity=(.36+Math.min(.32,motion*.2))*(.55+.45*section);
   });
-  return <mesh ref={ref} geometry={geometry}>
-    <meshBasicMaterial color={COLORS[index]} transparent opacity={.18} depthWrite={false}/>
-  </mesh>;
+  return <primitive object={line}/>;
 }
-function Pearl({index,progress,ready}:{index:number;progress:React.RefObject<number>;ready:React.RefObject<number>}){
+function Pearl({index,progress,ready,source}:{index:number;progress:React.RefObject<number>;ready:React.RefObject<number>;source:React.RefObject<THREE.Vector3[]>}){
   const root=useRef<THREE.Group>(null);
   const trail=useRef<THREE.Mesh>(null);
   const material=useMemo(()=>new THREE.MeshPhysicalMaterial({
@@ -52,6 +72,7 @@ function Pearl({index,progress,ready}:{index:number;progress:React.RefObject<num
     position.z+=exit*(index===0?.4:index===1?-1:.8);
     const alpha=1-Math.exp(-delta*5.4);
     root.current.position.lerp(position,alpha);
+    source.current[index].copy(root.current.position);
     root.current.rotation.y+=delta*.21;
     root.current.rotation.z=Math.sin(clock.elapsedTime*.34+index)*.11;
     const scale=(.69+index*.06)*(1-ease(.62,1,p)*.52)*ready.current;
@@ -74,6 +95,7 @@ function Pearl({index,progress,ready}:{index:number;progress:React.RefObject<num
 }
 function Scene({progress,ready}:{progress:React.RefObject<number>;ready:React.RefObject<number>}){
   const cloud=useRef<THREE.Points>(null);
+  const notePositions=useRef([new THREE.Vector3(-1.75,0,.28),new THREE.Vector3(0,0,1.25),new THREE.Vector3(1.75,0,-.42)]);
   const dust=useMemo(()=>{
     const positions=new Float32Array(330*3);
     for(let i=0;i<330;i++){
@@ -98,8 +120,8 @@ function Scene({progress,ready}:{progress:React.RefObject<number>;ready:React.Re
     <directionalLight position={[-3,5,6]} intensity={3.1} color="#fff9fa"/>
     <pointLight position={[2,2,3]} color="#f36371" intensity={25} distance={12}/>
     <pointLight position={[-3,-1,2]} color="#ffffff" intensity={14} distance={9}/>
-    {[0,1,2].map(i=><Pearl key={i} index={i} progress={progress} ready={ready}/>)}
-    {[0,1,2].map(i=><Filament key={i} index={i} progress={progress}/>)}
+    {[0,1,2].map(i=><Pearl key={i} index={i} progress={progress} ready={ready} source={notePositions}/>)}
+    {[0,1,2].map(i=><Filament key={i} index={i} progress={progress} source={notePositions}/>)}
     <points ref={cloud} geometry={dust}>
       <pointsMaterial color="#bd6b83" size={.026} opacity={.35} transparent depthWrite={false}/>
     </points>
