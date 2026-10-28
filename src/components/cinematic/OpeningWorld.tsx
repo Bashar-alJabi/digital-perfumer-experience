@@ -8,6 +8,7 @@ import "./opening.css";
 const clamp=(x:number)=>Math.min(1,Math.max(0,x));
 const ease=(a:number,b:number,x:number)=>{const t=clamp((x-a)/(b-a));return t*t*(3-2*t)};
 const COLORS=["#f36371","#ffc3d3","#262029"];
+type NoteTargets=React.RefObject<Array<[number,number]>>;
 /** The filament connects note centers, with its geometry rebuilt from the actual
  * sphere coordinates. The second segment is drawn only after the first one.
  * No free-floating tubes or trailing streaks. */
@@ -41,7 +42,7 @@ function SignatureConnection({positions,progress,ready}:{positions:React.RefObje
   });
   return <>{lines.map((line,i)=><primitive key={i} object={line}/>)}</>;
 }
-function Pearl({index,progress,ready,source}:{index:number;progress:React.RefObject<number>;ready:React.RefObject<number>;source:React.RefObject<THREE.Vector3[]>}){
+function Pearl({index,progress,ready,source,targets,blend}:{index:number;progress:React.RefObject<number>;ready:React.RefObject<number>;source:React.RefObject<THREE.Vector3[]>;targets:NoteTargets;blend:React.RefObject<number>}){
   const root=useRef<THREE.Group>(null);
   const trail=useRef<THREE.Mesh>(null);
   const material=useMemo(()=>new THREE.MeshPhysicalMaterial({
@@ -49,7 +50,7 @@ function Pearl({index,progress,ready,source}:{index:number;progress:React.RefObj
     clearcoat:1,clearcoatRoughness:.08,ior:1.45,thickness:.8,
     transmission:index===2?.0:.16,
   }),[index]);
-  useFrame(({clock},delta)=>{
+  useFrame(({clock,camera},delta)=>{
     if(!root.current)return;
     const p=progress.current,entry=ease(0,.12,p),exit=ease(.34,.88,p);
     const position=new THREE.Vector3(
@@ -60,6 +61,19 @@ function Pearl({index,progress,ready,source}:{index:number;progress:React.RefObj
     position.x+=(index-1)*exit*.72;
     position.y+=exit*(index===0?1.55:index===1?-.12:-1.65);
     position.z+=exit*(index===0?.4:index===1?-1:.8);
+    // The same sphere approaches the real dot inside its Philosophy card.
+    const target=targets.current[index];
+    if(target&&blend.current>0){
+      const perspective=camera as THREE.PerspectiveCamera;
+      const distance=perspective.position.z-position.z;
+      const halfHeight=Math.tan(THREE.MathUtils.degToRad(perspective.fov*.5))*distance;
+      const halfWidth=halfHeight*perspective.aspect;
+      const x=target[0]*halfWidth+perspective.position.x;
+      const y=-target[1]*halfHeight+perspective.position.y;
+      const amount=ease(.06,.88,blend.current);
+      position.x=THREE.MathUtils.lerp(position.x,x,amount);
+      position.y=THREE.MathUtils.lerp(position.y,y,amount);
+    }
     const alpha=1-Math.exp(-delta*5.4);
     root.current.position.lerp(position,alpha);
     source.current[index].copy(root.current.position);
@@ -83,7 +97,7 @@ function Pearl({index,progress,ready,source}:{index:number;progress:React.RefObj
     </mesh>
   </group>;
 }
-function Scene({progress,ready}:{progress:React.RefObject<number>;ready:React.RefObject<number>}){
+function Scene({progress,ready,targets,blend}:{progress:React.RefObject<number>;ready:React.RefObject<number>;targets:NoteTargets;blend:React.RefObject<number>}){
   const cloud=useRef<THREE.Points>(null);
   const notePositions=useRef([new THREE.Vector3(-1.75,0,.28),new THREE.Vector3(0,0,1.25),new THREE.Vector3(1.75,0,-.42)]);
   const dust=useMemo(()=>{
@@ -110,7 +124,7 @@ function Scene({progress,ready}:{progress:React.RefObject<number>;ready:React.Re
     <directionalLight position={[-3,5,6]} intensity={3.1} color="#fff9fa"/>
     <pointLight position={[2,2,3]} color="#f36371" intensity={25} distance={12}/>
     <pointLight position={[-3,-1,2]} color="#ffffff" intensity={14} distance={9}/>
-    {[0,1,2].map(i=><Pearl key={i} index={i} progress={progress} ready={ready} source={notePositions}/>)}
+    {[0,1,2].map(i=><Pearl key={i} index={i} progress={progress} ready={ready} source={notePositions} targets={targets} blend={blend}/>)}
     <SignatureConnection positions={notePositions} progress={progress} ready={ready}/>
     <points ref={cloud} geometry={dust}>
       <pointsMaterial color="#bd6b83" size={.026} opacity={.35} transparent depthWrite={false}/>
@@ -119,6 +133,8 @@ function Scene({progress,ready}:{progress:React.RefObject<number>;ready:React.Re
 }
 export default function OpeningWorld(){
   const progress=useRef(0),ready=useRef(0);
+  const philosophyBlend=useRef(0);
+  const noteTargets=useRef<Array<[number,number]>>([]);
   const [reduced,setReduced]=useState(false);
   useEffect(()=>{
     const media=matchMedia("(prefers-reduced-motion: reduce)");
@@ -139,6 +155,13 @@ export default function OpeningWorld(){
       pending=0;
       const rect=hero.getBoundingClientRect();
       const philosophyRect=philosophy.getBoundingClientRect();
+      philosophyBlend.current=clamp((innerHeight*.82-philosophyRect.top)/(innerHeight*.72));
+      const cards=Array.from(philosophy.querySelectorAll<HTMLElement>(".space-y-8 > div"));
+      noteTargets.current=cards.map((card,i)=>{
+        const marker=card.querySelector<HTMLElement>(`[title="${["Top Note","Heart Note","Base Note"][i]}"]`);
+        const point=(marker??card).getBoundingClientRect();
+        return [((point.left+point.width*.5)/innerWidth-.5)*2,((point.top+point.height*.5)/innerHeight-.5)*2];
+      });
       progress.current=clamp(-rect.top/Math.max(1,rect.height-window.innerHeight*.2));
       const show=clamp((philosophyRect.bottom-window.innerHeight*.1)/Math.max(1,window.innerHeight*.6));
       hero.style.setProperty("--opening-world-visibility",show.toFixed(3));
@@ -155,7 +178,7 @@ export default function OpeningWorld(){
     <div className="opening-ambient"/>
     <Canvas dpr={[1,1.5]} camera={{position:[0,0,9.5],fov:46,near:.1,far:50}}
       gl={{alpha:true,antialias:true,powerPreference:"high-performance"}} fallback={<div/>}>
-      <Scene progress={progress} ready={ready}/>
+      <Scene progress={progress} ready={ready} targets={noteTargets} blend={philosophyBlend}/>
     </Canvas>
     <div className="opening-vignette"/>
   </div>;
