@@ -1,0 +1,146 @@
+"use client";
+
+import { Canvas, useFrame } from "@react-three/fiber";
+import { useEffect, useMemo, useRef, useState } from "react";
+import * as THREE from "three";
+import "./opening.css";
+
+const clamp=(x:number)=>Math.min(1,Math.max(0,x));
+const ease=(a:number,b:number,x:number)=>{const t=clamp((x-a)/(b-a));return t*t*(3-2*t)};
+const COLORS=["#f36371","#ffc3d3","#262029"];
+const curves=[
+  [[-2.4,0.35,0],[-1.6,-.8,.55],[-.25,-.24,1.3],[1.3,.8,.4],[3.2,.24,-.5]],
+  [[-2.7,-1.3,-.4],[-1.1,.25,.5],[0,0,1.4],[1.5,-.35,.4],[3,1,-.6]],
+  [[-2.5,1.2,-.2],[-1.4,1.1,-.6],[.3,-.3,1.4],[1.7,.6,.2],[3,-1.4,-.3]],
+];
+function Filament({index,progress}:{index:number;progress:React.RefObject<number>}){
+  const ref=useRef<THREE.Mesh>(null);
+  const geometry=useMemo(()=>{
+    const path=new THREE.CatmullRomCurve3(curves[index].map(p=>new THREE.Vector3(...p)));
+    return new THREE.TubeGeometry(path,126,.022,6,false);
+  },[index]);
+  useFrame(({clock})=>{
+    const mesh=ref.current;if(!mesh)return;
+    const p=progress.current;
+    const material=mesh.material as THREE.MeshBasicMaterial;
+    material.opacity=.08+.4*ease(0,.35,p)*(1-ease(.75,1,p));
+    mesh.rotation.z=Math.sin(clock.elapsedTime*.2+index)*.08;
+    mesh.scale.y=.9+Math.sin(clock.elapsedTime*.38+index)*.06;
+  });
+  return <mesh ref={ref} geometry={geometry}>
+    <meshBasicMaterial color={COLORS[index]} transparent opacity={.18} depthWrite={false}/>
+  </mesh>;
+}
+function Pearl({index,progress,ready}:{index:number;progress:React.RefObject<number>;ready:React.RefObject<number>}){
+  const root=useRef<THREE.Group>(null);
+  const trail=useRef<THREE.Mesh>(null);
+  const material=useMemo(()=>new THREE.MeshPhysicalMaterial({
+    color:COLORS[index],metalness:index===2?.45:.1,roughness:.12,
+    clearcoat:1,clearcoatRoughness:.08,ior:1.45,thickness:.8,
+    transmission:index===2?.0:.16,
+  }),[index]);
+  useFrame(({clock},delta)=>{
+    if(!root.current)return;
+    const p=progress.current,entry=ease(0,.12,p),exit=ease(.62,.98,p);
+    const position=new THREE.Vector3(
+      (index-1)*1.75+Math.sin(clock.elapsedTime*.38+index*2)*.11,
+      Math.sin(index*2.1+clock.elapsedTime*.34)*.32,
+      index===1?1.25:index===2?-.42:.28
+    );
+    position.x+=(index-1)*exit*1.55;
+    position.y+=exit*(index===0?-2.8:index===1?.8:2.6);
+    position.z+=exit*(index===0?.4:index===1?-1:.8);
+    const alpha=1-Math.exp(-delta*5.4);
+    root.current.position.lerp(position,alpha);
+    root.current.rotation.y+=delta*.21;
+    root.current.rotation.z=Math.sin(clock.elapsedTime*.34+index)*.11;
+    const scale=(.69+index*.06)*(1-ease(.8,1,p)*.45)*ready.current;
+    root.current.scale.setScalar(THREE.MathUtils.lerp(root.current.scale.x,scale,alpha));
+    if(trail.current){
+      trail.current.scale.setScalar(1.4+entry*.25);
+      (trail.current.material as THREE.MeshBasicMaterial).opacity=(.13+.08*entry)*(1-exit);
+    }
+  });
+  return <group ref={root}>
+    <mesh material={material}><sphereGeometry args={[.8,48,32]}/></mesh>
+    <mesh position={[-.18,.24,.56]} scale={[.27,.4,.09]}>
+      <sphereGeometry args={[1,18,12]}/><meshBasicMaterial color="#fffaff" transparent opacity={.38} depthWrite={false}/>
+    </mesh>
+    <mesh ref={trail} rotation={[1.14,.3,index*.45]}>
+      <torusGeometry args={[1.04,.012,6,96]}/>
+      <meshBasicMaterial color={index===2?"#f6bfcf":COLORS[index]} transparent opacity={.17} depthWrite={false}/>
+    </mesh>
+  </group>;
+}
+function Scene({progress,ready}:{progress:React.RefObject<number>;ready:React.RefObject<number>}){
+  const cloud=useRef<THREE.Points>(null);
+  const dust=useMemo(()=>{
+    const positions=new Float32Array(330*3);
+    for(let i=0;i<330;i++){
+      const a=i*2.399963,r=Math.sqrt((i+.5)/330)*4.4;
+      positions[3*i]=r*Math.cos(a);positions[3*i+1]=r*Math.sin(a)*.72;
+      positions[3*i+2]=Math.sin(i*13.37)*1.9-1.2;
+    }
+    const g=new THREE.BufferGeometry();g.setAttribute("position",new THREE.BufferAttribute(positions,3));return g;
+  },[]);
+  useFrame(({camera,clock},dt)=>{
+    const p=progress.current;
+    camera.position.z=THREE.MathUtils.damp(camera.position.z,9.5-ease(.12,.95,p)*1.65,2.8,dt);
+    camera.position.y=THREE.MathUtils.damp(camera.position.y,ease(.25,.98,p)*.3,2.8,dt);
+    camera.lookAt(0,0,0);
+    if(cloud.current){
+      cloud.current.rotation.z=clock.elapsedTime*.012;
+      (cloud.current.material as THREE.PointsMaterial).opacity=.4*(1-ease(.5,.98,p))*ready.current;
+    }
+  });
+  return <>
+    <ambientLight intensity={1.8}/>
+    <directionalLight position={[-3,5,6]} intensity={3.1} color="#fff9fa"/>
+    <pointLight position={[2,2,3]} color="#f36371" intensity={25} distance={12}/>
+    <pointLight position={[-3,-1,2]} color="#ffffff" intensity={14} distance={9}/>
+    {[0,1,2].map(i=><Pearl key={i} index={i} progress={progress} ready={ready}/>)}
+    {[0,1,2].map(i=><Filament key={i} index={i} progress={progress}/>)}
+    <points ref={cloud} geometry={dust}>
+      <pointsMaterial color="#bd6b83" size={.026} opacity={.35} transparent depthWrite={false}/>
+    </points>
+  </>;
+}
+export default function OpeningWorld(){
+  const progress=useRef(0),ready=useRef(0);
+  const [reduced,setReduced]=useState(false);
+  useEffect(()=>{
+    const media=matchMedia("(prefers-reduced-motion: reduce)");
+    const update=()=>setReduced(media.matches);
+    update();media.addEventListener("change",update);
+    const onReady=()=>{ready.current=1;};
+    window.addEventListener("dp:opening-ready",onReady);
+    const loader=document.querySelector('[aria-label="Entering Digital Perfumer"]') as HTMLElement|null;
+    if(!loader||getComputedStyle(loader).display==="none")ready.current=1;
+    return()=>{media.removeEventListener("change",update);window.removeEventListener("dp:opening-ready",onReady);};
+  },[]);
+  useEffect(()=>{
+    const hero=document.getElementById("home");
+    if(!hero)return;
+    let pending=0;
+    const update=()=>{
+      pending=0;
+      const rect=hero.getBoundingClientRect();
+      progress.current=clamp(-rect.top/Math.max(1,rect.height));
+      hero.style.setProperty("--opening-progress",progress.current.toFixed(4));
+    };
+    const onScroll=()=>{if(!pending)pending=requestAnimationFrame(update)};
+    update();
+    window.addEventListener("scroll",onScroll,{passive:true});
+    window.addEventListener("resize",onScroll);
+    return()=>{window.removeEventListener("scroll",onScroll);window.removeEventListener("resize",onScroll);cancelAnimationFrame(pending)};
+  },[]);
+  if(reduced)return null;
+  return <div className="opening-world" aria-hidden="true">
+    <div className="opening-ambient"/>
+    <Canvas dpr={[1,1.5]} camera={{position:[0,0,9.5],fov:46,near:.1,far:50}}
+      gl={{alpha:true,antialias:true,powerPreference:"high-performance"}} fallback={<div/>}>
+      <Scene progress={progress} ready={ready}/>
+    </Canvas>
+    <div className="opening-vignette"/>
+  </div>;
+}
