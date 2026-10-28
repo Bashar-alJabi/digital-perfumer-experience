@@ -11,7 +11,7 @@
 #home .opening-dots{transform:translateY(calc(var(--opening-progress) * -35px)) scale(calc(1 - var(--opening-progress) * .45));opacity:clamp(0,calc(1 - var(--opening-progress) * 1.2),1)}
 /* PHILOSOPHY: single slot, not stacked cards; card's origin is a circle. */
 #philosophy{height:430vh;position:relative;z-index:2;margin-top:-12vh;isolation:isolate;--morph-progress:0}
-#philosophy>.philosophy-morph-section{height:100%;padding:0;background:transparent}
+#philosophy>section{height:100%;padding:0;background:transparent}
 .philosophy-morph-stage{position:sticky;top:0;height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden}
 .philosophy-morph-layout{width:min(1300px,94vw);display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:clamp(42px,7vw,120px);align-items:center;padding:80px 30px}
 .philosophy-manifesto{position:relative;transform:perspective(1450px) translate3d(calc(var(--manifesto-depth,0) * -90px),calc(var(--manifesto-depth,0) * 30px),calc(var(--manifesto-depth,0) * -240px)) rotateY(calc(var(--manifesto-depth,0) * 15deg));opacity:clamp(.2,calc(1 - var(--manifesto-depth,0) * .75),1);transform-origin:30% 50%}
@@ -33,7 +33,7 @@
   #home .opening-world{opacity:calc(var(--opening-world-visibility) * .7)}
   #home .opening-copy{transform:translateY(calc(var(--opening-progress) * -50px));opacity:clamp(0,calc(1 - var(--opening-progress) * 1.2),1)}
   #philosophy{height:auto;margin-top:0}
-  #philosophy>.philosophy-morph-section{height:auto;padding:80px 24px}
+  #philosophy>section{height:auto;padding:80px 24px}
   .philosophy-morph-stage{position:relative;height:auto;overflow:visible}
   .philosophy-morph-layout{display:flex;flex-direction:column;gap:48px;padding:0;width:100%}
   .philosophy-manifesto{transform:none;opacity:1}
@@ -44,11 +44,19 @@
 @media(prefers-reduced-motion:reduce){
   #home{height:auto}#home>section{position:relative}#home .opening-world{display:none}
   #home .opening-copy,#home .opening-dots{transform:none;opacity:1}
-  #philosophy{height:auto;margin:0}#philosophy>.philosophy-morph-section{height:auto;padding:90px 24px}
+  #philosophy{height:auto;margin:0}#philosophy>section{height:auto;padding:90px 24px}
   .philosophy-morph-stage{position:relative;height:auto;overflow:visible}
   .philosophy-morph-layout{display:flex;flex-direction:column;gap:40px}
   .philosophy-manifesto{transform:none;opacity:1}
   .philosophy-morph-slot{height:auto;min-height:0;display:grid;gap:24px}
   .philosophy-morph-card{position:relative;opacity:1;clip-path:none;transform:none}
   .philosophy-morph-body{opacity:1;transform:none;filter:none}
+}
+
+/* The stage is the inner section: it must span the entire 430vh scroll runway.
+   Its child remains sticky so the camera sees a single changing screen. */
+@media(min-width:768px) and (prefers-reduced-motion:no-preference){
+  #philosophy>section{height:100%!important;min-height:0!important;position:relative;padding:0!important}
+  #philosophy .philosophy-morph-stage{position:sticky!important;top:0!important;height:100vh!important;max-height:100vh!important}
+  #philosophy .philosophy-morph-card{backface-visibility:hidden;transform-style:preserve-3d}
 }
