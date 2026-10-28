@@ -61,3 +61,38 @@
 
 /* Fixed thread coordinates are viewport-relative; avoid a perspective containing block. */
 #philosophy{perspective:none}
+
+/* PHILOSOPHY — a deliberate hand-off from the Hero, not a second unrelated page.
+   The line is local to the section so its path and card anchors share coordinates.
+   The end of the last strand leads into the actual Formula section below. */
+#philosophy .philosophy-connection{
+  position:absolute;inset:0;width:100%;height:100%;
+  overflow:visible;z-index:1;pointer-events:none;display:block;
+}
+#philosophy .philosophy-connection path{
+  stroke-width:1.65;stroke-linecap:round;stroke-linejoin:round;fill:none;
+  filter:drop-shadow(0 0 4px rgba(243,99,113,.18));
+}
+#philosophy .space-y-8>div{
+  position:relative;z-index:2;
+  box-shadow:0 18px 56px rgba(113,45,71,.07),0 0 calc(var(--cn-note-highlight,0) * 30px) rgba(243,99,113,.14);
+  border-color:rgba(243,99,113,calc(.2 + var(--cn-note-highlight,0) * .34));
+  transition:box-shadow .25s ease,border-color .25s ease;
+}
+#philosophy .space-y-8>div.cn-note-illuminated{
+  box-shadow:0 22px 70px rgba(113,45,71,.1),0 0 30px rgba(243,99,113,.12);
+}
+#philosophy .space-y-8>div>.relative{transform-origin:50% 45%}
+#philosophy :is(h2,h3,p){-webkit-font-smoothing:antialiased}
+#formula{position:relative;z-index:2}
+@media(max-width:767px){
+  #philosophy .philosophy-connection{opacity:.55}
+  #philosophy .space-y-8>div>.relative{
+    transform:translateY(calc((1 - var(--cn-card-appear,0)) * 24px));
+    opacity:clamp(.3,var(--cn-card-appear,1),1);
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  #philosophy .philosophy-connection{display:none}
+  #philosophy .space-y-8>div{transition:none}
+}
