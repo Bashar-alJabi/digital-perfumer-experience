@@ -8,7 +8,7 @@ import "./opening.css";
 const clamp=(x:number)=>Math.min(1,Math.max(0,x));
 const ease=(a:number,b:number,x:number)=>{const t=clamp((x-a)/(b-a));return t*t*(3-2*t)};
 const COLORS=["#f36371","#ffc3d3","#262029"];
-type NoteTargets=React.RefObject<Array<[number,number]>>;
+type NoteTargets=React.RefObject<Array<[number,number,number]>>;
 /** The filament connects note centers, with its geometry rebuilt from the actual
  * sphere coordinates. The second segment is drawn only after the first one.
  * No free-floating tubes or trailing streaks. */
@@ -70,7 +70,7 @@ function Pearl({index,progress,ready,source,targets,blend}:{index:number;progres
       const halfWidth=halfHeight*perspective.aspect;
       const x=target[0]*halfWidth+perspective.position.x;
       const y=-target[1]*halfHeight+perspective.position.y;
-      const amount=ease(.1,1,blend.current);
+      const amount=ease(.08,.98,target[2]);
       position.x=THREE.MathUtils.lerp(position.x,x,amount);
       position.y=THREE.MathUtils.lerp(position.y,y,amount);
       position.z=THREE.MathUtils.lerp(position.z,2.75,amount);
@@ -135,7 +135,7 @@ function Scene({progress,ready,targets,blend}:{progress:React.RefObject<number>;
 export default function OpeningWorld(){
   const progress=useRef(0),ready=useRef(0);
   const philosophyBlend=useRef(0);
-  const noteTargets=useRef<Array<[number,number]>>([]);
+  const noteTargets=useRef<Array<[number,number,number]>>([]);
   const [reduced,setReduced]=useState(false);
   useEffect(()=>{
     const media=matchMedia("(prefers-reduced-motion: reduce)");
@@ -166,7 +166,9 @@ export default function OpeningWorld(){
         // Keep the actual 3D notes OUTSIDE the opaque card surfaces.
         // They sit on the left margin, visible above the composition.
         const x=point.left-Math.min(34,Math.max(16,point.width*1.3));
-        return [((x)/innerWidth-.5)*2,((point.top+point.height*.5)/innerHeight-.5)*2];
+        const rect=card.getBoundingClientRect();
+        const arrival=clamp((innerHeight*.68-rect.top)/(innerHeight*.56));
+        return [((x)/innerWidth-.5)*2,((point.top+point.height*.5)/innerHeight-.5)*2,arrival];
       });
       progress.current=clamp(-rect.top/Math.max(1,rect.height-window.innerHeight*.2));
       const show=clamp((philosophyRect.bottom-window.innerHeight*.1)/Math.max(1,window.innerHeight*.6));
