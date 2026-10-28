@@ -95,7 +95,7 @@ export default function CinematicDirector(){
       const memory=rects[6];
       const arrival=smooth(-h*.4,h*.75,h*.5-memory.top);
       const departure=smooth(-h*.3,h*.7,memory.bottom-h*.5);
-      const dark=arrival*(1-departure);
+      const dark=arrival*departure;
       flow.current.dark=dark;
       main.style.setProperty("--cn-dark",dark.toFixed(3));
       main.classList.toggle("cn-in-memory",dark>.45);
