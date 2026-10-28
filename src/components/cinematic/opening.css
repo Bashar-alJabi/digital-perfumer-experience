@@ -44,3 +44,17 @@
   #philosophy{margin-top:0;padding-top:8rem}
   #philosophy .lg\\:sticky h2,#philosophy .space-y-8>div>.relative{transform:none!important;opacity:1!important}
 }
+
+/* One deliberately drawn digital signature. Lines connect actual note markers;
+   never float independently and never intercept card interactions. */
+#philosophy .philosophy-connection{
+  position:fixed;inset:0;width:100vw;height:100vh;overflow:visible;
+  pointer-events:none;z-index:3;fill:none;
+}
+#philosophy .philosophy-connection path{
+  stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;
+  vector-effect:non-scaling-stroke;filter:drop-shadow(0 0 5px rgba(243,99,113,.2));
+}
+@media (prefers-reduced-motion:reduce){
+  #philosophy .philosophy-connection{display:none}
+}
