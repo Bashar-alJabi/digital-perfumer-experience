@@ -71,7 +71,7 @@ function Note({idx,flow,reduce}:{idx:number;flow:React.RefObject<JourneyState>;r
   const group=useRef<THREE.Group>(null);
   const glass=useMemo(()=>new THREE.MeshPhysicalMaterial({
     color:NOTE_COLORS[idx], metalness:idx===2?.5:.04,roughness:.12,
-    clearcoat:1,clearcoatRoughness:.08,transparent:true,opacity:.8, transmission:idx===2?.08:.4,
+    clearcoat:1,clearcoatRoughness:.08,transparent:true,opacity:.8, transmission:0,
     thickness:.65,ior:1.45,depthWrite:false,
   }),[idx]);
   const core=useMemo(()=>new THREE.MeshStandardMaterial({
@@ -216,6 +216,79 @@ function FrameEnergy({flow}:{flow:React.RefObject<JourneyState>}) {
     <mesh rotation={[0,0,.785]}><ringGeometry args={[2.7,2.72,4]}/><meshBasicMaterial color="#ffd8df" transparent opacity={.36} side={THREE.DoubleSide}/></mesh>
   </group>;
 }
+
+/** Light stems connect the original Philosophy cards to their note, not to invented 3D cards. */
+function NoteStems({flow}:{flow:React.RefObject<JourneyState>}) {
+  const stems=useMemo(()=>[0,1,2].map(i=>{
+    const geometry=new THREE.BufferGeometry();
+    geometry.setAttribute("position",new THREE.BufferAttribute(new Float32Array(42*3),3));
+    const material=new THREE.LineBasicMaterial({color:NOTE_COLORS[i],transparent:true,opacity:0,depthWrite:false});
+    return new THREE.Line(geometry,material);
+  }),[]);
+  useFrame(({viewport})=>{
+    const f=flow.current;
+    const strength=f.chapter===1?smooth(.01,.24,f.local)*(1-smooth(.88,1,f.local)):0;
+    stems.forEach((line,i)=>{
+      const target=f.targets[i]??[.4,(i-1)*.32];
+      const [x,y]=worldPoint(target[0],target[1],viewport.aspect);
+      const pts=line.geometry.getAttribute("position") as THREE.BufferAttribute;
+      for(let j=0;j<42;j++){
+        const t=j/41;
+        const curve= Math.sin(t*Math.PI);
+        pts.setXYZ(j,
+          morph(-1.9,x-.38,t)+curve*(i-1)*.55,
+          morph(2.4,y,t)+curve*.6,
+          morph(-1.5,.25,t)-curve*.7);
+      }
+      pts.needsUpdate=true;
+      (line.material as THREE.LineBasicMaterial).opacity=strength*.38;
+      line.visible=strength>.01;
+    });
+  });
+  return <>{stems.map((line,i)=><primitive key={i} object={line}/>)}</>;
+}
+/** The actual Skills section summons a filament network from the dispersed memory dust. */
+function SkillLoom({flow}:{flow:React.RefObject<JourneyState>}) {
+  const root=useRef<THREE.Group>(null);
+  const lines=useMemo(()=>{
+    const nodes:Array<[number,number,number]>=[];
+    for(let i=0;i<27;i++){
+      const ring=i%3,angle=i*.72;
+      nodes.push([Math.cos(angle)*(1.4+ring*.85),Math.sin(angle)*(1.1+ring*.54),(i%5)*-.32]);
+    }
+    const coords:number[]=[];
+    nodes.forEach((node,i)=>{
+      const next=nodes[(i+3)%nodes.length];
+      coords.push(...node,...next);
+      if(i%3===0)coords.push(...node,...nodes[(i+7)%nodes.length]);
+    });
+    const g=new THREE.BufferGeometry();
+    g.setAttribute("position",new THREE.Float32BufferAttribute(coords,3));
+    return {g,vertices:coords.length/3,nodes};
+  },[]);
+  useFrame((_,dt)=>{
+    if(!root.current)return;
+    const f=flow.current;
+    const strength=f.chapter===7?smooth(0,.35,f.local)*(1-smooth(.88,1,f.local)):0;
+    root.current.visible=strength>.004;
+    root.current.position.x=THREE.MathUtils.damp(root.current.position.x,.65,2.1,dt);
+    root.current.rotation.y+=(strength?dt*.06:0);
+    const mesh=root.current.children[0] as THREE.LineSegments;
+    const material=mesh.material as THREE.LineBasicMaterial;
+    material.opacity=morph(material.opacity,strength*.48,.08);
+    lines.g.setDrawRange(0,Math.floor(lines.vertices*strength/2)*2);
+  });
+  return <group ref={root} position={[.65,0,-2]}>
+    <lineSegments geometry={lines.g}>
+      <lineBasicMaterial color="#e4a9bf" transparent opacity={0} depthWrite={false}/>
+    </lineSegments>
+    {lines.nodes.filter((_,i)=>i%2===0).map((pos,i)=><mesh key={i} position={pos}>
+      <sphereGeometry args={[.052,10,8]}/>
+      <meshBasicMaterial color={i%3===0?"#f36371":"#d9b4d4"}/>
+    </mesh>)}
+  </group>;
+}
+
 function AtelierScene({flow,reduced}:{flow:React.RefObject<JourneyState>;reduced:boolean}) {
   useFrame(({camera},dt)=>{
     const f=flow.current;
@@ -232,8 +305,10 @@ function AtelierScene({flow,reduced}:{flow:React.RefObject<JourneyState>;reduced
     <pointLight color="#b4a0ff" position={[-3,-2,2]} intensity={20} distance={12}/>
     {[0,1,2].map(i=><Note key={i} idx={i} flow={flow} reduce={reduced}/>)}
     {[0,1,2].map(i=><Ribbon key={i} index={i} flow={flow}/>)}
+    <NoteStems flow={flow}/>
     <StatsOrbits flow={flow}/>
     <MemoryDust flow={flow} reduced={reduced}/>
+    <SkillLoom flow={flow}/>
     <FrameEnergy flow={flow}/>
   </>;
 }
