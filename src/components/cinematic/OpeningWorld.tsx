@@ -5,145 +5,134 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import "./opening.css";
 
-const clamp=(x:number)=>Math.min(1,Math.max(0,x));
+const clamp=(x:number)=>Math.max(0,Math.min(1,x));
 const ease=(a:number,b:number,x:number)=>{const t=clamp((x-a)/(b-a));return t*t*(3-2*t)};
 const COLORS=["#f36371","#ffc3d3","#262029"];
-type NoteTargets=React.RefObject<Array<[number,number,number]>>;
-function Pearl({index,progress,ready,source,targets,blend}:{index:number;progress:React.RefObject<number>;ready:React.RefObject<number>;source:React.RefObject<THREE.Vector3[]>;targets:NoteTargets;blend:React.RefObject<number>}){
-  const root=useRef<THREE.Group>(null);
-  const trail=useRef<THREE.Mesh>(null);
+type Director={hero:number;entry:number;stage:number;anchor:[number,number];};
+const INITIAL:[number,number,number][]=[[-1.75,0,.28],[0,0,1.25],[1.75,0,-.42]];
+
+function Note({index,director,ready}:{index:number;director:React.RefObject<Director>;ready:React.RefObject<number>}){
+  const group=useRef<THREE.Group>(null);
+  const ring=useRef<THREE.Mesh>(null);
   const material=useMemo(()=>new THREE.MeshPhysicalMaterial({
-    color:COLORS[index],metalness:index===2?.45:.1,roughness:.12,
-    clearcoat:1,clearcoatRoughness:.08,ior:1.45,thickness:.8,
-    transmission:index===2?.0:.16,
+    color:COLORS[index],metalness:index===2?.45:.1,roughness:.12,clearcoat:1,
+    clearcoatRoughness:.08,ior:1.45,thickness:.8,transmission:index===2?0:.16,
   }),[index]);
-  useFrame(({clock,camera},delta)=>{
-    if(!root.current)return;
-    const p=progress.current,entry=ease(0,.12,p);
-    const position=new THREE.Vector3(
-      (index-1)*1.75+Math.sin(clock.elapsedTime*.38+index*2)*.11,
-      Math.sin(index*2.1+clock.elapsedTime*.34)*.32,
-      index===1?1.25:index===2?-.42:.28
-    );
-    const stage=blend.current;
-    const ordinal=Math.min(2,Math.floor(stage*3));
-    const local=stage>=1?1:stage*3-ordinal;
-    const approach=index===ordinal?ease(0,.20,local):index<ordinal?1:0;
-    const target=targets.current[0];
-    if(target&&approach>0){
-      const perspective=camera as THREE.PerspectiveCamera;
-      const distance=perspective.position.z-position.z;
-      const halfHeight=Math.tan(THREE.MathUtils.degToRad(perspective.fov*.5))*distance;
-      const halfWidth=halfHeight*perspective.aspect;
-      position.x=THREE.MathUtils.lerp(position.x,target[0]*halfWidth+perspective.position.x,approach);
-      position.y=THREE.MathUtils.lerp(position.y,-target[1]*halfHeight+perspective.position.y,approach);
-      position.z=THREE.MathUtils.lerp(position.z,2.2,approach);
-    }
-    const alpha=1-Math.exp(-delta*5.4);
-    root.current.position.lerp(position,alpha);
-    source.current[index].copy(root.current.position);
-    root.current.rotation.y+=delta*.21;
-    root.current.rotation.z=Math.sin(clock.elapsedTime*.34+index)*.11;
-    const unfolded=ease(.10,.34,local);
-    const sphereVisibility=index<ordinal?0:index===ordinal?1-unfolded:1;
-    const scale=(.69+index*.06)*(1-ease(.72,1,p)*.2)*sphereVisibility*ready.current;
-    root.current.scale.setScalar(THREE.MathUtils.lerp(root.current.scale.x,scale,alpha));
-    if(trail.current){
-      trail.current.scale.setScalar(1.4+entry*.25);
-      (trail.current.material as THREE.MeshBasicMaterial).opacity=(.13+.08*entry)*sphereVisibility;
-    }
+  useFrame(({clock,camera},dt)=>{
+    if(!group.current)return;
+    const d=director.current;
+    const sceneCamera=camera as THREE.PerspectiveCamera;
+    const phase=Math.min(2,Math.floor(d.stage*3));
+    const local=d.stage===1?1:d.stage*3-phase;
+    const arrange=ease(0,1,d.entry);
+    // Hero: a horizontal signature. Transition: a genuine vertical constellation,
+    // ordered coral -> pink -> dark, travelling into Philosophy as a single motif.
+    const hero=new THREE.Vector3(...INITIAL[index]);
+    hero.x+=Math.sin(clock.elapsedTime*.28+index*1.8)*.07*(1-arrange);
+    hero.y+=Math.sin(clock.elapsedTime*.33+index)*.12*(1-arrange);
+    const column=new THREE.Vector3(-.15,1.9-index*1.8,.5);
+    const destination=hero.clone().lerp(column,arrange);
+    // Destination is the exact center of the ONE shared card slot.
+    const depth=2.2;
+    const distance=sceneCamera.position.z-depth;
+    const halfH=Math.tan(THREE.MathUtils.degToRad(sceneCamera.fov*.5))*distance;
+    const halfW=halfH*sceneCamera.aspect;
+    const cardTarget=new THREE.Vector3(d.anchor[0]*halfW+sceneCamera.position.x,
+      -d.anchor[1]*halfH+sceneCamera.position.y,depth);
+    // Only the current sphere flies from vertical formation to its card.
+    const arrival=index===phase?ease(0,.21,local):index<phase?1:0;
+    if(index===phase)destination.lerp(cardTarget,arrival);
+    else if(index<phase)destination.lerp(cardTarget,1);
+    const unfold=index===phase?ease(.16,.36,local):index<phase?1:0;
+    const visibility=index<phase?0:index===phase?1-unfold:1;
+    const fadeToNext=index===phase?1-ease(.8,.97,local):1;
+    const alpha=1-Math.exp(-Math.min(dt,.05)*5.8);
+    group.current.position.lerp(destination,alpha);
+    group.current.rotation.y+=dt*.17;
+    const targetScale=(.68+index*.055)*visibility*fadeToNext*ready.current;
+    group.current.scale.setScalar(THREE.MathUtils.lerp(group.current.scale.x,targetScale,alpha));
+    if(ring.current)(ring.current.material as THREE.MeshBasicMaterial).opacity=.16*visibility*fadeToNext;
   });
-  return <group ref={root}>
-    <mesh material={material}><sphereGeometry args={[.8,48,32]}/></mesh>
-    <mesh position={[-.18,.24,.56]} scale={[.27,.4,.09]}>
-      <sphereGeometry args={[1,18,12]}/><meshBasicMaterial color="#fffaff" transparent opacity={.38} depthWrite={false}/>
+  return <group ref={group}>
+    <mesh material={material}><sphereGeometry args={[.8,40,28]}/></mesh>
+    <mesh position={[-.18,.23,.57]} scale={[.25,.36,.08]}>
+      <sphereGeometry args={[1,16,12]}/>
+      <meshBasicMaterial color="#fffaff" transparent opacity={.38} depthWrite={false}/>
     </mesh>
-    <mesh ref={trail} rotation={[1.14,.3,index*.45]}>
-      <torusGeometry args={[1.04,.012,6,96]}/>
-      <meshBasicMaterial color={index===2?"#f6bfcf":COLORS[index]} transparent opacity={.17} depthWrite={false}/>
+    <mesh ref={ring} rotation={[1.14,.3,index*.45]}>
+      <torusGeometry args={[1.04,.012,6,80]}/>
+      <meshBasicMaterial color={COLORS[index]} transparent opacity={.16} depthWrite={false}/>
     </mesh>
   </group>;
 }
-function Scene({progress,ready,targets,blend}:{progress:React.RefObject<number>;ready:React.RefObject<number>;targets:NoteTargets;blend:React.RefObject<number>}){
-  const cloud=useRef<THREE.Points>(null);
-  const notePositions=useRef([new THREE.Vector3(-1.75,0,.28),new THREE.Vector3(0,0,1.25),new THREE.Vector3(1.75,0,-.42)]);
+function Scene({director,ready}:{director:React.RefObject<Director>;ready:React.RefObject<number>}){
   const dust=useMemo(()=>{
-    const positions=new Float32Array(330*3);
-    for(let i=0;i<330;i++){
-      const a=i*2.399963,r=Math.sqrt((i+.5)/330)*4.4;
-      positions[3*i]=r*Math.cos(a);positions[3*i+1]=r*Math.sin(a)*.72;
-      positions[3*i+2]=Math.sin(i*13.37)*1.9-1.2;
-    }
-    const g=new THREE.BufferGeometry();g.setAttribute("position",new THREE.BufferAttribute(positions,3));return g;
+    const array=new Float32Array(230*3);
+    for(let i=0;i<230;i++){const a=i*2.399963,r=Math.sqrt((i+.5)/230)*4.2;
+      array[i*3]=r*Math.cos(a);array[i*3+1]=r*Math.sin(a)*.7;array[i*3+2]=Math.sin(i*13.37)*1.5-1.5}
+    const g=new THREE.BufferGeometry();g.setAttribute("position",new THREE.BufferAttribute(array,3));return g;
   },[]);
   useFrame(({camera,clock},dt)=>{
-    const p=progress.current;
-    camera.position.z=THREE.MathUtils.damp(camera.position.z,9.5-ease(.06,.9,p)*2.15,2.8,dt);
-    camera.position.y=THREE.MathUtils.damp(camera.position.y,ease(.25,.98,p)*.3,2.8,dt);
-    camera.lookAt(0,0,0);
-    if(cloud.current){
-      cloud.current.rotation.z=clock.elapsedTime*.012;
-      (cloud.current.material as THREE.PointsMaterial).opacity=.4*(1-ease(.5,.98,p))*ready.current;
-    }
+    const d=director.current,arrival=ease(0,1,d.entry);
+    const c=camera as THREE.PerspectiveCamera;
+    c.position.z=THREE.MathUtils.damp(c.position.z,9.5-arrival*1.25,2.3,dt);
+    c.position.y=THREE.MathUtils.damp(c.position.y,-arrival*.26,2.3,dt);
+    c.rotation.z=THREE.MathUtils.damp(c.rotation.z,arrival*.025,2.3,dt);
+    c.lookAt(0,0,0);
   });
   return <>
     <ambientLight intensity={1.8}/>
     <directionalLight position={[-3,5,6]} intensity={3.1} color="#fff9fa"/>
     <pointLight position={[2,2,3]} color="#f36371" intensity={25} distance={12}/>
     <pointLight position={[-3,-1,2]} color="#ffffff" intensity={14} distance={9}/>
-    {[0,1,2].map(i=><Pearl key={i} index={i} progress={progress} ready={ready} source={notePositions} targets={targets} blend={blend}/>)}
-    <points ref={cloud} geometry={dust}>
-      <pointsMaterial color="#bd6b83" size={.026} opacity={.35} transparent depthWrite={false}/>
+    {[0,1,2].map(i=><Note key={i} index={i} director={director} ready={ready}/>)}
+    <points geometry={dust}>
+      <pointsMaterial color="#bd6b83" size={.024} transparent opacity={.27} depthWrite={false}/>
     </points>
   </>;
 }
 export default function OpeningWorld(){
-  const progress=useRef(0),ready=useRef(0);
-  const philosophyBlend=useRef(0);
-  const noteTargets=useRef<Array<[number,number,number]>>([]);
+  const director=useRef<Director>({hero:0,entry:0,stage:0,anchor:[.44,0]});
+  const ready=useRef(1);
   const [reduced,setReduced]=useState(false);
   useEffect(()=>{
     const media=matchMedia("(prefers-reduced-motion: reduce)");
-    const update=()=>setReduced(media.matches);
-    update();media.addEventListener("change",update);
-    const onReady=()=>{ready.current=1;};
-    window.addEventListener("dp:opening-ready",onReady);
-    const loader=document.querySelector('[aria-label="Entering Digital Perfumer"]') as HTMLElement|null;
-    if(!loader||getComputedStyle(loader).display==="none")ready.current=1;
-    return()=>{media.removeEventListener("change",update);window.removeEventListener("dp:opening-ready",onReady);};
+    const changed=()=>setReduced(media.matches);
+    changed();media.addEventListener("change",changed);
+    return()=>media.removeEventListener("change",changed);
   },[]);
   useEffect(()=>{
     const hero=document.getElementById("home");
     const philosophy=document.getElementById("philosophy");
     if(!hero||!philosophy)return;
-    let pending=0;
+    let raf=0;
     const update=()=>{
-      pending=0;
-      const rect=hero.getBoundingClientRect();
-      const philosophyRect=philosophy.getBoundingClientRect();
-      philosophyBlend.current=clamp(-philosophyRect.top/Math.max(1,philosophyRect.height-innerHeight));
+      raf=0;
+      const h=innerHeight,rect=hero.getBoundingClientRect();
+      const p=philosophy.getBoundingClientRect();
+      const d=director.current;
+      d.hero=clamp(-rect.top/Math.max(1,rect.height-h*.2));
+      // Line-up starts while Hero is still pinned; no sudden crossing at boundary.
+      d.entry=ease(.35,1,d.hero);
+      d.stage=clamp(-p.top/Math.max(1,p.height-h));
       const slot=philosophy.querySelector<HTMLElement>("[data-philosophy-target]");
       const point=slot?.getBoundingClientRect();
-      if(point){
-        noteTargets.current=[[((point.left+point.width*.5)/innerWidth-.5)*2,((point.top+point.height*.5)/innerHeight-.5)*2,1]];
-      }
-      progress.current=clamp(-rect.top/Math.max(1,rect.height-window.innerHeight*.2));
-      const show=clamp((philosophyRect.bottom-window.innerHeight*.1)/Math.max(1,window.innerHeight*.6));
-      hero.style.setProperty("--opening-world-visibility",show.toFixed(3));
-      hero.style.setProperty("--opening-progress",progress.current.toFixed(4));
+      if(point)d.anchor=[(point.left+point.width*.5)/innerWidth*2-1,(point.top+point.height*.5)/h*2-1];
+      const show=clamp((p.bottom-h*.1)/(h*.55));
+      hero.style.setProperty("--opening-progress",String(d.hero));
+      hero.style.setProperty("--opening-world-visibility",String(show));
     };
-    const onScroll=()=>{if(!pending)pending=requestAnimationFrame(update)};
-    update();
-    window.addEventListener("scroll",onScroll,{passive:true});
-    window.addEventListener("resize",onScroll);
-    return()=>{window.removeEventListener("scroll",onScroll);window.removeEventListener("resize",onScroll);cancelAnimationFrame(pending)};
+    const scroll=()=>{if(!raf)raf=requestAnimationFrame(update)};
+    update();window.addEventListener("scroll",scroll,{passive:true});
+    window.addEventListener("resize",scroll);
+    return()=>{cancelAnimationFrame(raf);window.removeEventListener("scroll",scroll);window.removeEventListener("resize",scroll)};
   },[]);
   if(reduced)return null;
   return <div className="opening-world" aria-hidden="true">
     <div className="opening-ambient"/>
     <Canvas dpr={[1,1.5]} camera={{position:[0,0,9.5],fov:46,near:.1,far:50}}
       gl={{alpha:true,antialias:true,powerPreference:"high-performance"}} fallback={<div/>}>
-      <Scene progress={progress} ready={ready} targets={noteTargets} blend={philosophyBlend}/>
+      <Scene director={director} ready={ready}/>
     </Canvas>
     <div className="opening-vignette"/>
   </div>;
