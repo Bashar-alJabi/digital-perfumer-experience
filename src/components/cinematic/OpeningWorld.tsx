@@ -25,17 +25,32 @@ function Pearl({index,progress,ready,source,targets,blend}:{index:number;progres
       Math.sin(index*2.1+clock.elapsedTime*.34)*.32,
       index===1?1.25:index===2?-.42:.28
     );
+    const stage=blend.current;
+    const ordinal=Math.min(2,Math.floor(stage*3));
+    const local=stage>=1?1:stage*3-ordinal;
+    const approach=index===ordinal?ease(0,.20,local):index<ordinal?1:0;
+    const target=targets.current[0];
+    if(target&&approach>0){
+      const perspective=camera as THREE.PerspectiveCamera;
+      const distance=perspective.position.z-position.z;
+      const halfHeight=Math.tan(THREE.MathUtils.degToRad(perspective.fov*.5))*distance;
+      const halfWidth=halfHeight*perspective.aspect;
+      position.x=THREE.MathUtils.lerp(position.x,target[0]*halfWidth+perspective.position.x,approach);
+      position.y=THREE.MathUtils.lerp(position.y,-target[1]*halfHeight+perspective.position.y,approach);
+      position.z=THREE.MathUtils.lerp(position.z,2.2,approach);
+    }
     const alpha=1-Math.exp(-delta*5.4);
     root.current.position.lerp(position,alpha);
     source.current[index].copy(root.current.position);
     root.current.rotation.y+=delta*.21;
     root.current.rotation.z=Math.sin(clock.elapsedTime*.34+index)*.11;
-    const philosophyFade=ease(0,.75,blend.current);
-    const scale=(.69+index*.06)*(1-ease(.72,1,p)*.2)*(1-philosophyFade)*ready.current;
+    const unfolded=ease(.10,.34,local);
+    const sphereVisibility=index<ordinal?0:index===ordinal?1-unfolded:1;
+    const scale=(.69+index*.06)*(1-ease(.72,1,p)*.2)*sphereVisibility*ready.current;
     root.current.scale.setScalar(THREE.MathUtils.lerp(root.current.scale.x,scale,alpha));
     if(trail.current){
       trail.current.scale.setScalar(1.4+entry*.25);
-      (trail.current.material as THREE.MeshBasicMaterial).opacity=(.13+.08*entry)*(1-philosophyFade);
+      (trail.current.material as THREE.MeshBasicMaterial).opacity=(.13+.08*entry)*sphereVisibility;
     }
   });
   return <group ref={root}>
@@ -106,21 +121,12 @@ export default function OpeningWorld(){
       pending=0;
       const rect=hero.getBoundingClientRect();
       const philosophyRect=philosophy.getBoundingClientRect();
-      const cards=Array.from(philosophy.querySelectorAll<HTMLElement>(".space-y-8 > div"));
-      // Fade the original Hero spheres at the stage boundary. The Philosophy
-      // cards become the spheres themselves, so nothing flies behind panels.
-      philosophyBlend.current=clamp((innerHeight*.45-philosophyRect.top)/(innerHeight*.4));
-
-      noteTargets.current=cards.map((card,i)=>{
-        const marker=card.querySelector<HTMLElement>(`[title="${["Top Note","Heart Note","Base Note"][i]}"]`);
-        const point=(marker??card).getBoundingClientRect();
-        // Keep the actual 3D notes OUTSIDE the opaque card surfaces.
-        // They sit on the left margin, visible above the composition.
-        const x=point.left-Math.min(34,Math.max(16,point.width*1.3));
-        const rect=card.getBoundingClientRect();
-        const arrival=clamp((innerHeight*.68-rect.top)/(innerHeight*.56));
-        return [((x)/innerWidth-.5)*2,((point.top+point.height*.5)/innerHeight-.5)*2,arrival];
-      });
+      philosophyBlend.current=clamp(-philosophyRect.top/Math.max(1,philosophyRect.height-innerHeight));
+      const slot=philosophy.querySelector<HTMLElement>("[data-philosophy-target]");
+      const point=slot?.getBoundingClientRect();
+      if(point){
+        noteTargets.current=[[((point.left+point.width*.5)/innerWidth-.5)*2,((point.top+point.height*.5)/innerHeight-.5)*2,1]];
+      }
       progress.current=clamp(-rect.top/Math.max(1,rect.height-window.innerHeight*.2));
       const show=clamp((philosophyRect.bottom-window.innerHeight*.1)/Math.max(1,window.innerHeight*.6));
       hero.style.setProperty("--opening-world-visibility",show.toFixed(3));
