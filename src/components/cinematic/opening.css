@@ -247,3 +247,9 @@
   #philosophy .note-morph-card{opacity:var(--note-presence,0)!important;visibility:visible!important;}
   #philosophy .note-morph-card:not([data-note-active="true"]){pointer-events:none}
 }
+
+/* Root #philosophy wraps the actual PhilosophySection; the inner section must
+   span the scroll runway or sticky content would unpin halfway through. */
+@media(min-width:768px) and (prefers-reduced-motion:no-preference){
+  #philosophy>section{height:100%;min-height:0;padding:0!important;overflow:visible!important;}
+}
