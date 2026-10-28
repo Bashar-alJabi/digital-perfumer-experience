@@ -265,3 +265,69 @@
     opacity:var(--note-text,0)!important;
   }
 }
+
+/* Final in-flow choreography. Earlier sticky/stacking overrides are intentionally
+   neutralized. The original three notes are THREE DISTINCT VERTICAL CARDS. */
+@media(min-width:768px) and (prefers-reduced-motion:no-preference){
+  #philosophy{
+    height:auto!important;min-height:0!important;
+    margin-top:-10vh!important;
+    padding:12vh 0 8vh!important;
+    perspective:none!important;
+  }
+  #philosophy>section{
+    height:auto!important;min-height:0!important;
+    padding:7rem 3rem 10rem!important;
+  }
+  #philosophy .philosophy-inner{
+    position:relative!important;top:auto!important;
+    display:block!important;height:auto!important;
+    max-width:1280px!important;padding:0!important;
+  }
+  #philosophy .philosophy-inner>.grid{
+    display:grid!important;height:auto!important;
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
+    align-items:start!important;gap:clamp(40px,7vw,110px)!important;
+  }
+  #philosophy .philosophy-manifesto{
+    position:sticky!important;top:24vh!important;
+    transform:perspective(1400px) translate3d(0,calc(var(--manifesto-depth,0) * 52px),calc(var(--manifesto-depth,0) * -190px)) rotateY(calc(var(--manifesto-depth,0) * -12deg))!important;
+    opacity:clamp(.2,calc(1 - var(--manifesto-depth,0) * .8),1)!important;
+    filter:blur(calc(var(--manifesto-depth,0) * 2px));
+  }
+  #philosophy .philosophy-notes{
+    display:flex!important;flex-direction:column!important;
+    gap:clamp(32px,5vw,70px)!important;
+    position:relative!important;height:auto!important;min-height:0!important;
+    perspective:1200px;
+  }
+  #philosophy .note-morph-card,
+  #philosophy .note-morph-card:nth-child(n){
+    --note-unfold:0;--note-text:0;
+    position:relative!important;display:block!important;
+    inset:auto!important;
+    flex-shrink:0!important;
+    width:100%!important;min-height:360px!important;
+    margin:0!important;padding:clamp(30px,3vw,46px)!important;
+    opacity:1!important;visibility:visible!important;
+    border-radius:28px!important;
+    transform:perspective(1200px) translateZ(calc((1 - var(--note-unfold)) * -110px)) rotateY(calc((1 - var(--note-unfold)) * -9deg))!important;
+    transform-origin:50% 50%!important;
+    /* A genuine round aperture expands into the EXISTING card silhouette. */
+    clip-path:circle(calc(5% + var(--note-unfold) * 145%) at 50% 49%);
+    background:var(--note-color)!important;
+    box-shadow:0 24px 65px rgba(74,29,48,.13)!important;
+    filter:none!important;z-index:auto!important;
+    transition:none!important;
+    pointer-events:auto!important;
+  }
+  #philosophy .note-morph-card::before{
+    background:radial-gradient(circle at 37% 30%,rgba(255,255,255,.42),transparent 55%)!important;
+    z-index:0!important;opacity:calc(1 - var(--note-unfold))!important;
+  }
+  #philosophy .note-morph-card .note-morph-content{
+    transform:perspective(1000px) translate3d(0,calc((1 - var(--note-text)) * 46px),calc((1 - var(--note-text)) * -110px)) rotateX(calc((1 - var(--note-text)) * 12deg))!important;
+    opacity:var(--note-text,0)!important;filter:blur(calc((1 - var(--note-text)) * 3px))!important;
+  }
+  #philosophy .note-morph-card .note-morph-number{opacity:calc(var(--note-text) * .15)!important}
+}
