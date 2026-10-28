@@ -1,875 +1,177 @@
 "use client";
-
-import { motion, useScroll, useTransform } from "framer-motion";
+import { allProjects } from "@/lib/experience/allProjects";
+import { useChapterSelection } from "@/components/experience/useChapterSelection";
 import Image from "next/image";
-import React, { useEffect, useRef, useState } from "react";
-
-interface Project {
-	id: string;
-	title: string;
-	category: string;
-	description: string;
-	tags: string[];
-	link?: string;
-	codeLink?: string;
-	customImage?: string;
-	type: "professional" | "personal";
-}
-
-const allProjects: Project[] = [
-	// --- Professional Projects ---
-	{
-		id: "01",
-		title: "Sustayn Official Website",
-		category: "Corporate Digital Hub",
-		description:
-			"Official corporate website designed and developed for Sustayn, delivering a high-performance brand presence and fluid UI/UX.",
-		tags: ["WordPress", "UI/UX Design", "Performance"],
-		link: "https://sustayn.co/",
-		customImage: "/projects/sustayn.webp",
-		type: "professional",
-	},
-	{
-		id: "02",
-		title: "Success School",
-		category: "Educational Platform",
-		description:
-			"Modern educational platform built for interactive learning, custom functionality, and scalable student management.",
-		tags: ["WordPress", "Custom Coding", "UX Design"],
-		link: "https://success-school.net/",
-		customImage: "/projects/success-school.webp",
-		type: "professional",
-	},
-	{
-		id: "03",
-		title: "Formation Avenir",
-		category: "Educational Platform",
-		description:
-			"Clean, conversion-focused platform designed for teacher training courses and educational program enrollment.",
-		tags: ["WordPress", "Elementor", "Responsive"],
-		link: "https://formationavenir.com/",
-		customImage: "/projects/formation-avenir.webp",
-		type: "professional",
-	},
-	{
-		id: "04",
-		title: "IndustriXport",
-		category: "Industrial B2B Portal",
-		description:
-			"B2B international business portal focusing on clear service hierarchy, multi-language support, and industrial branding.",
-		tags: ["WordPress", "UI/UX", "SEO"],
-		link: "https://industrixport.fr/",
-		customImage: "/projects/industrixport.webp",
-		type: "professional",
-	},
-	{
-		id: "05",
-		title: "Rich Stars Real Estate",
-		category: "Real Estate Platform",
-		description:
-			"Dubai property showcase platform crafted with responsive luxury layout structure and seamless property discovery.",
-		tags: ["Wix", "Web Development", "UI Design"],
-		link: "https://richstarsuae.com/",
-		// customImage: "/projects/rich-stars.webp",
-		type: "professional",
-	},
-	{
-		id: "06",
-		title: "The Private Address Realty",
-		category: "Luxury Real Estate",
-		description:
-			"Exclusive realty showroom showcasing premium property listings with a high-end bespoke digital aesthetic.",
-		tags: ["Wix", "Real Estate", "UI Design"],
-		link: "https://theprivateaddress.com/",
-		customImage: "/projects/the-private-address.webp",
-		type: "professional",
-	},
-	{
-		id: "07",
-		title: "ARAHA Trading Corporate (PTE)",
-		category: "Corporate Frontend Platform",
-		description:
-			"Sleek corporate web application developed with React and Tailwind CSS, featuring fluid animations and interactive presentation.",
-		tags: ["React", "Tailwind CSS", "Shadcn UI", "Motion.dev"],
-		link: "https://arahatrading.com/",
-		// customImage: "/projects/araha-trading.webp",
-		type: "professional",
-	},
-	{
-		id: "08",
-		title: "INBS Websites",
-		category: "Businessmen Services Platform",
-		description: "",
-		tags: ["React", "Tailwind CSS", "Shadcn UI", "Motion.dev"],
-		link: "https://inbs-uae.com/",
-		// customImage: "/projects/inbs-realestate.webp",
-		type: "professional",
-	},
-	{
-		id: "09",
-		title: "INBS Real Estate Websites",
-		category: "Enterprise & Real Estate Portal",
-		description:
-			"Dual corporate platform and luxury real estate portal engineered for high performance, lead routing, and UI responsiveness.",
-		tags: ["React", "Tailwind CSS", "Shadcn UI", "Motion.dev"],
-		link: "https://inbsrealestate.com/",
-		// customImage: "/projects/inbs-realestate.webp",
-		type: "professional",
-	},
-
-	// --- Personal Projects ---
-	{
-		id: "P1",
-		title: "Portfolio",
-		category: "Personal Portfolio",
-		description:
-			"Personal portfolio website designed and developed to showcase creative development, digital experiences, and selected projects.",
-		tags: ["HTML", "Css", "JavaScript"],
-		link: "https://bashar-aljabi.vercel.app/",
-		codeLink: "https://github.com/Bashar-alJabi/Portfolio",
-		customImage: "/projects/portfolio.webp",
-		type: "personal",
-	},
-	{
-		id: "P2",
-		title: "Home of Feelings",
-		category: "Creative Web Experience",
-		description:
-			"Interactive web experience focused on emotional storytelling, immersive visual design, and expressive user interaction.",
-		tags: ["Next.js", "React", "TypeScript", "Vercel"],
-		link: "https://home-of-feelings.vercel.app/",
-		codeLink: "https://github.com/Bashar-alJabi/Home-of-Feelings",
-		customImage: "/projects/home-of-feelings.webp",
-		type: "personal",
-	},
-	{
-		id: "P3",
-		title: "Windows",
-		category: "OS Interface Web Preview",
-		description:
-			"Experimental web UI concept modeling desktop operating system window management and interactive desktop layouts.",
-		tags: ["PugJs", "Sass", "Bootstrap", "GulpJs"],
-		link: "https://windows-preview.vercel.app/",
-		codeLink: "https://github.com/Bashar-alJabi/Windows",
-		customImage: "/projects/windows.webp",
-		type: "personal",
-	},
-	{
-		id: "P4",
-		title: "ClickMart",
-		category: "E-Commerce Application",
-		description:
-			"Interactive digital shopping app featuring modern cart state management, product filters, and responsive design.",
-		tags: ["React", "TypeScript", "Tailwind", "Shadcn UI"],
-		codeLink: "https://github.com/Bashar-alJabi/ClickMart",
-		customImage: "/projects/clickmart.webp",
-		type: "personal",
-	},
-	{
-		id: "P5",
-		title: "BetaShop",
-		category: "Next.js Storefront",
-		description:
-			"Modern full-featured web shop built with Next.js, emphasizing page speed, component architecture, and DaisyUI states.",
-		tags: ["Next.js", "TypeScript", "Tailwind", "DaisyUI"],
-		link: "https://betashop.vercel.app/",
-		codeLink: "https://github.com/Bashar-alJabi/BetaShop",
-		customImage: "/projects/betashop.webp",
-		type: "personal",
-	},
-	{
-		id: "P6",
-		title: "IMEX",
-		category: "Internet Movies Explorer",
-		description:
-			"Movie discovery web application consuming external cinema APIs to dynamically search and present media content.",
-		tags: ["React", "React Bootstrap", "Material UI"],
-		link: "https://imex4movies.vercel.app/",
-		codeLink: "https://github.com/Bashar-alJabi/IMEX",
-		customImage: "/projects/imex.webp",
-		type: "personal",
-	},
-];
-
-function ProjectCard({
-	project,
-	imageSrc,
-	isActive,
-	handleImageError,
-}: {
-	project: Project;
-	imageSrc: string | null;
-	isActive: boolean;
-	handleImageError: (id: string) => void;
-}) {
-	return (
-		<motion.div
-			animate={{
-				opacity: isActive ? 1 : 0.5,
-				scale: isActive ? 1 : 0.94,
-			}}
-			transition={{
-				duration: 0.45,
-				ease: "easeOut",
-			}}
-			className="group relative w-105 md:w-120 shrink-0 rounded-3xl border border-perfume-soft bg-perfume-surface p-5 md:p-6 overflow-hidden shadow-sm hover:border-perfume-primary/50 transition-all duration-300 flex flex-col justify-between"
-		>
-			{/* Image Container */}
-			<div className="relative w-full h-48 md:h-60 rounded-2xl overflow-hidden mb-4 border border-perfume-soft/50 bg-perfume-bg">
-				{imageSrc ? (
-					<Image
-						src={imageSrc}
-						alt={project.title}
-						fill
-						sizes="(max-width: 768px) 420px, 480px"
-						onError={() => handleImageError(project.id)}
-						className="object-cover object-top transition-transform duration-700 group-hover:scale-105"
-					/>
-				) : (
-					<div className="w-full h-full bg-linear-to-br from-rose-950/20 via-perfume-soft/40 to-perfume-surface flex items-center justify-center">
-						<span className="text-4xl font-serif text-perfume-primary/40">
-							/{project.id}
-						</span>
-					</div>
-				)}
-
-				<div className="absolute bottom-3 left-3 right-3 flex flex-wrap gap-1.5 z-10 pointer-events-none">
-					{project.tags.map((tag) => (
-						<span
-							key={tag}
-							className="dp-label px-2.5 py-1 rounded-md bg-black/60 backdrop-blur-md text-white/90 border border-white/10"
-						>
-							{tag}
-						</span>
-					))}
-				</div>
-
-				{project.link && (
-					<a
-						href={project.link}
-						target="_blank"
-						rel="noopener noreferrer"
-						className="absolute top-3 right-3 w-9 h-9 rounded-full bg-black/50 backdrop-blur-md text-white flex items-center justify-center opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300 text-xs hover:bg-perfume-primary"
-						aria-label={`Visit ${project.title}`}
-					>
-						↗
-					</a>
-				)}
-			</div>
-
-			<div className="flex flex-col flex-1 justify-between">
-				<div>
-					<div className="flex justify-between items-center mb-1.5">
-						<span className="dp-label uppercase tracking-[0.25em] font-medium text-perfume-primary">
-							{project.category}
-						</span>
-
-						<span className="dp-label text-perfume-text/40">/{project.id}</span>
-					</div>
-
-					<h3 className="dp-card-title font-normal text-perfume-text mb-2 group-hover:text-perfume-primary transition-colors duration-300">
-						{project.link ? (
-							<a
-								href={project.link}
-								target="_blank"
-								rel="noopener noreferrer"
-								className="hover:underline"
-							>
-								{project.title}
-							</a>
-						) : (
-							project.title
-						)}
-					</h3>
-				</div>
-
-				<div className="flex items-center gap-3 pt-2 border-t border-perfume-soft/30 dp-label">
-					{project.link && (
-						<a
-							href={project.link}
-							target="_blank"
-							rel="noopener noreferrer"
-							className="text-perfume-primary hover:underline flex items-center gap-1"
-						>
-							<span>Live Site</span>
-							<span>↗</span>
-						</a>
-					)}
-
-					{project.codeLink && (
-						<a
-							href={project.codeLink}
-							target="_blank"
-							rel="noopener noreferrer"
-							className="text-perfume-text/60 hover:text-perfume-text hover:underline flex items-center gap-1 ml-auto"
-						>
-							<span>Source Code</span>
-							<span>↗</span>
-						</a>
-					)}
-				</div>
-			</div>
-		</motion.div>
-	);
-}
-
+import { useState } from "react";
 export default function ProjectsSection() {
-	const [activeTab, setActiveTab] = useState<"professional" | "personal">(
-		"professional",
-	);
-	const [imgErrors, setImgErrors] = useState<Record<string, boolean>>({});
-	const [scrollDistance, setScrollDistance] = useState(0);
-
-	const [activeProjectIndex, setActiveProjectIndex] = useState(0);
-
-	const targetRef = useRef<HTMLDivElement>(null);
-	const trackRef = useRef<HTMLDivElement>(null);
-
-	const filteredProjects = allProjects.filter((p) => p.type === activeTab);
-
-	// Dynamic calculation for horizontal track scroll distance across all viewport sizes
-	useEffect(() => {
-		const calculateScrollDistance = () => {
-			// if (trackRef.current) {
-			if (trackRef.current && window.innerWidth >= 768) {
-				const totalTrackWidth = trackRef.current.scrollWidth;
-				const viewportWidth = window.innerWidth;
-				setScrollDistance(Math.max(0, totalTrackWidth - viewportWidth + 48));
-			}
-		};
-
-		calculateScrollDistance();
-		window.addEventListener("resize", calculateScrollDistance);
-		return () => window.removeEventListener("resize", calculateScrollDistance);
-	}, [activeTab, filteredProjects.length]);
-
-	// Desktop/tablet only
-	const { scrollYProgress } = useScroll({
-		target: targetRef,
-	});
-
-	const x = useTransform(scrollYProgress, [0, 1], [0, -scrollDistance]);
-
-	useEffect(() => {
-		const unsubscribe = scrollYProgress.on("change", (progress) => {
-			if (filteredProjects.length <= 1) {
-				setActiveProjectIndex(0);
-				return;
-			}
-
-			const index = Math.round(progress * (filteredProjects.length - 1));
-
-			setActiveProjectIndex(
-				Math.min(filteredProjects.length - 1, Math.max(0, index)),
-			);
-		});
-
-		return () => unsubscribe();
-	}, [scrollYProgress, filteredProjects.length]);
-
-	const handleImageError = (id: string) => {
-		setImgErrors((prev) => ({ ...prev, [id]: true }));
-	};
-
-	// Priority image selector: Custom image -> Live Screenshot API -> Gradient fallback
-	// const getProjectImage = (project: Project) => {
-	// 	if (imgErrors[project.id]) return null;
-	// 	if (project.customImage) return project.customImage;
-	// 	if (project.link && !project.link.includes("github.com")) {
-	// 		return `https://s0.wp.com/mshots/v1/${encodeURIComponent(project.link)}?w=800&h=500`;
-	// 	}
-	// 	return null;
-	// };
-	const getProjectImage = (project: Project) => {
-		if (imgErrors[project.id]) return null;
-		return project.customImage ?? null;
-	};
-
-	// return (
-	// 	<section
-	// 		ref={targetRef}
-	// 		className="relative h-[280vh] bg-perfume-bg text-perfume-text border-t border-perfume-soft/40 select-none"
-	// 	>
-	// 		{/* Sticky Viewport Frame */}
-	// 		<div className="sticky top-0 flex h-screen flex-col justify-between overflow-hidden py-10 md:py-16">
-	// 			{/* Section Header & Tab Controls */}
-	// 			<div className="max-w-7xl w-full mx-auto px-6 md:px-12 flex flex-col md:flex-row md:items-center justify-between gap-6 z-20">
-	// 				<div>
-	// 					<span className="dp-label uppercase tracking-[0.4em] font-semibold text-perfume-text/60">
-	// 						[ Selected Compositions ]
-	// 					</span>
-	// 					<h2 className="mt-2 dp-section-title font-normal text-perfume-text">
-	// 						Real-World Formulations
-	// 					</h2>
-	// 				</div>
-
-	// 				{/* Interactive Tab Switcher */}
-	// 				<div className="flex items-center gap-2 p-1.5 rounded-full bg-perfume-surface border border-perfume-soft/80 shadow-sm">
-	// 					<button
-	// 						onClick={() => setActiveTab("professional")}
-	// 						className={`px-5 py-2 dp-small uppercase tracking-widest rounded-full transition-all duration-300 cursor-pointer ${
-	// 							activeTab === "professional"
-	// 								? "bg-perfume-primary text-white shadow-md"
-	// 								: "text-perfume-text/70 hover:text-perfume-text"
-	// 						}`}
-	// 					>
-	// 						Professional (
-	// 						{allProjects.filter((p) => p.type === "professional").length})
-	// 					</button>
-	// 					<button
-	// 						onClick={() => setActiveTab("personal")}
-	// 						className={`px-5 py-2 dp-small uppercase tracking-widest rounded-full transition-all duration-300 cursor-pointer ${
-	// 							activeTab === "personal"
-	// 								? "bg-perfume-primary text-white shadow-md"
-	// 								: "text-perfume-text/70 hover:text-perfume-text"
-	// 						}`}
-	// 					>
-	// 						Personal (
-	// 						{allProjects.filter((p) => p.type === "personal").length})
-	// 					</button>
-	// 				</div>
-	// 			</div>
-
-	// 			{/* Horizontal Motion Track */}
-	// 			<div className="relative flex items-center my-auto overflow-hidden">
-	// 				<motion.div
-	// 					ref={trackRef}
-	// 					style={{ x }}
-	// 					className="flex gap-6 md:gap-8 px-6 md:px-12 w-max"
-	// 				>
-	// 					{filteredProjects.map((project) => {
-	// 						const imageSrc = getProjectImage(project);
-
-	// 						return (
-	// 							<div
-	// 								key={project.id}
-	// 								className="group relative w-[85vw] sm:w-105 md:w-120 shrink-0 rounded-3xl border border-perfume-soft bg-perfume-surface p-5 md:p-6 overflow-hidden shadow-sm hover:border-perfume-primary/50 transition-all duration-300 flex flex-col justify-between"
-	// 							>
-	// 								{/* Image Container */}
-	// 								<div className="relative w-full h-48 md:h-60 rounded-2xl overflow-hidden mb-4 border border-perfume-soft/50 bg-perfume-bg">
-	// 									{imageSrc ? (
-	// 										// <img
-	// 										// 	src={imageSrc}
-	// 										// 	alt={project.title}
-	// 										// 	onError={() => handleImageError(project.id)}
-	// 										// 	className="w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-105"
-	// 										// 	loading="lazy"
-	// 										// />
-	// 										<Image
-	// 											src={imageSrc}
-	// 											alt={project.title}
-	// 											fill
-	// 											sizes="(max-width: 640px) 85vw, (max-width: 768px) 420px, 480px"
-	// 											onError={() => handleImageError(project.id)}
-	// 											className="object-cover object-top transition-transform duration-700 group-hover:scale-105"
-	// 										/>
-	// 									) : (
-	// 										<div className="w-full h-full bg-linear-to-br from-rose-950/20 via-perfume-soft/40 to-perfume-surface flex items-center justify-center">
-	// 											<span className="text-4xl font-serif text-perfume-primary/40">
-	// 												/{project.id}
-	// 											</span>
-	// 										</div>
-	// 									)}
-
-	// 									{/* Tech Stack Chips Overlay */}
-	// 									<div className="absolute bottom-3 left-3 right-3 flex flex-wrap gap-1.5 z-10 pointer-events-none">
-	// 										{project.tags.map((tag) => (
-	// 											<span
-	// 												key={tag}
-	// 												className="dp-label px-2.5 py-1 rounded-md bg-black/60 backdrop-blur-md text-white/90 border border-white/10"
-	// 											>
-	// 												{tag}
-	// 											</span>
-	// 										))}
-	// 									</div>
-
-	// 									{/* External Link Indicator */}
-	// 									{project.link && (
-	// 										<a
-	// 											href={project.link}
-	// 											target="_blank"
-	// 											rel="noopener noreferrer"
-	// 											className="absolute top-3 right-3 w-9 h-9 rounded-full bg-black/50 backdrop-blur-md text-white flex items-center justify-center opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300 text-xs hover:bg-perfume-primary"
-	// 											aria-label={`Visit ${project.title}`}
-	// 										>
-	// 											↗
-	// 										</a>
-	// 									)}
-	// 								</div>
-
-	// 								{/* Card Main Body */}
-	// 								<div className="flex flex-col flex-1 justify-between">
-	// 									<div>
-	// 										<div className="flex justify-between items-center mb-1.5">
-	// 											<span className="dp-label uppercase tracking-[0.25em] font-medium text-perfume-primary">
-	// 												{project.category}
-	// 											</span>
-	// 											<span className="dp-label text-perfume-text/40">
-	// 												/{project.id}
-	// 											</span>
-	// 										</div>
-
-	// 										<h3 className="dp-card-title font-normal text-perfume-text mb-2 group-hover:text-perfume-primary transition-colors duration-300">
-	// 											{project.link ? (
-	// 												<a
-	// 													href={project.link}
-	// 													target="_blank"
-	// 													rel="noopener noreferrer"
-	// 													className="hover:underline"
-	// 												>
-	// 													{project.title}
-	// 												</a>
-	// 											) : (
-	// 												project.title
-	// 											)}
-	// 										</h3>
-
-	// 										{/* <p className="dp-body font-light text-perfume-text/75 leading-relaxed font-sans line-clamp-2 mb-4">
-	// 											{project.description}
-	// 										</p> */}
-	// 									</div>
-
-	// 									{/* Action Links (Live / Code) */}
-	// 									<div className="flex items-center gap-3 pt-2 border-t border-perfume-soft/30 dp-label">
-	// 										{project.link && (
-	// 											<a
-	// 												href={project.link}
-	// 												target="_blank"
-	// 												rel="noopener noreferrer"
-	// 												className="text-perfume-primary hover:underline flex items-center gap-1"
-	// 											>
-	// 												<span>Live Site</span>
-	// 												<span>↗</span>
-	// 											</a>
-	// 										)}
-	// 										{project.codeLink && (
-	// 											<a
-	// 												href={project.codeLink}
-	// 												target="_blank"
-	// 												rel="noopener noreferrer"
-	// 												className="text-perfume-text/60 hover:text-perfume-text hover:underline flex items-center gap-1 ml-auto"
-	// 											>
-	// 												<span>Source Code</span>
-	// 												<span>↗</span>
-	// 											</a>
-	// 										)}
-	// 									</div>
-	// 								</div>
-	// 							</div>
-	// 						);
-	// 					})}
-	// 				</motion.div>
-	// 			</div>
-	// 		</div>
-	// 	</section>
-	// );
-
-	return (
-		<section
-			ref={targetRef}
-			className="relative md:h-[280vh] bg-perfume-bg text-perfume-text border-t border-perfume-soft/40"
-		>
-			{/* Sticky Viewport Frame — Desktop / Tablet */}
-			<div className="md:sticky md:top-0 flex min-h-screen md:h-screen flex-col justify-between overflow-hidden py-10 md:py-16">
-				{/* Section Header & Tab Controls */}
-				<div className="max-w-7xl w-full mx-auto px-6 md:px-12 flex flex-col md:flex-row md:items-center justify-between gap-6 z-20">
-					<div>
-						<span className="dp-label uppercase tracking-[0.4em] font-semibold text-perfume-text/60">
-							[ THE COMPOSITIONS ]
-						</span>
-
-						<h2 className="mt-2 dp-section-title font-normal text-perfume-text">
-							Real-World Work
-						</h2>
-					</div>
-
-					{/* Interactive Tab Switcher */}
-					<div className="flex items-center gap-2 p-1.5 rounded-full bg-perfume-surface border border-perfume-soft/80 shadow-sm self-start md:self-auto">
-						<button
-							onClick={() => setActiveTab("professional")}
-							className={`px-5 py-2 dp-small uppercase tracking-widest rounded-full transition-all duration-300 cursor-pointer ${
-								activeTab === "professional"
-									? "bg-perfume-primary text-white shadow-md"
-									: "text-perfume-text/70 hover:text-perfume-text"
-							}`}
-						>
-							Professional (
-							{allProjects.filter((p) => p.type === "professional").length})
-						</button>
-
-						<button
-							onClick={() => setActiveTab("personal")}
-							className={`px-5 py-2 dp-small uppercase tracking-widest rounded-full transition-all duration-300 cursor-pointer ${
-								activeTab === "personal"
-									? "bg-perfume-primary text-white shadow-md"
-									: "text-perfume-text/70 hover:text-perfume-text"
-							}`}
-						>
-							Personal (
-							{allProjects.filter((p) => p.type === "personal").length})
-						</button>
-					</div>
-				</div>
-
-				{/* ====================================================== */}
-				{/* MOBILE — Native Horizontal Swipe                      */}
-				{/* ====================================================== */}
-				<div className="md:hidden relative w-full overflow-hidden my-auto">
-					<div
-						ref={trackRef}
-						className="flex gap-4 overflow-x-auto overflow-y-hidden px-6 pb-4 w-full snap-x snap-mandatory overscroll-x-contain"
-						style={{
-							scrollbarWidth: "none",
-							WebkitOverflowScrolling: "touch",
-						}}
-					>
-						{filteredProjects.map((project) => {
-							const imageSrc = getProjectImage(project);
-
-							return (
-								<div
-									key={project.id}
-									className="group relative w-[85vw] shrink-0 snap-center rounded-3xl border border-perfume-soft bg-perfume-surface p-5 overflow-hidden shadow-sm flex flex-col justify-between"
-								>
-									{/* Image Container */}
-									<div className="relative w-full h-48 rounded-2xl overflow-hidden mb-4 border border-perfume-soft/50 bg-perfume-bg">
-										{imageSrc ? (
-											<Image
-												src={imageSrc}
-												alt={project.title}
-												fill
-												sizes="85vw"
-												onError={() => handleImageError(project.id)}
-												className="object-cover object-top"
-											/>
-										) : (
-											<div className="w-full h-full bg-linear-to-br from-rose-950/20 via-perfume-soft/40 to-perfume-surface flex items-center justify-center">
-												<span className="text-4xl font-serif text-perfume-primary/40">
-													/{project.id}
-												</span>
-											</div>
-										)}
-
-										{/* Tech Stack Chips Overlay */}
-										<div className="absolute bottom-3 left-3 right-3 flex flex-wrap gap-1.5 z-10 pointer-events-none">
-											{project.tags.map((tag) => (
-												<span
-													key={tag}
-													className="dp-label px-2.5 py-1 rounded-md bg-black/60 backdrop-blur-md text-white/90 border border-white/10"
-												>
-													{tag}
-												</span>
-											))}
-										</div>
-
-										{/* External Link Indicator */}
-										{project.link && (
-											<a
-												href={project.link}
-												target="_blank"
-												rel="noopener noreferrer"
-												className="absolute top-3 right-3 w-9 h-9 rounded-full bg-black/50 backdrop-blur-md text-white flex items-center justify-center opacity-80 text-xs hover:bg-perfume-primary"
-												aria-label={`Visit ${project.title}`}
-											>
-												↗
-											</a>
-										)}
-									</div>
-
-									{/* Card Main Body */}
-									<div className="flex flex-col flex-1 justify-between">
-										<div>
-											<div className="flex justify-between items-center mb-1.5">
-												<span className="dp-label uppercase tracking-[0.25em] font-medium text-perfume-primary">
-													{project.category}
-												</span>
-
-												<span className="dp-label text-perfume-text/40">
-													/{project.id}
-												</span>
-											</div>
-
-											<h3 className="dp-card-title font-normal text-perfume-text mb-2">
-												{project.link ? (
-													<a
-														href={project.link}
-														target="_blank"
-														rel="noopener noreferrer"
-														className="hover:underline"
-													>
-														{project.title}
-													</a>
-												) : (
-													project.title
-												)}
-											</h3>
-										</div>
-
-										{/* Action Links */}
-										<div className="flex items-center gap-3 pt-2 border-t border-perfume-soft/30 dp-label">
-											{project.link && (
-												<a
-													href={project.link}
-													target="_blank"
-													rel="noopener noreferrer"
-													className="text-perfume-primary hover:underline flex items-center gap-1"
-												>
-													<span>Live Site</span>
-													<span>↗</span>
-												</a>
-											)}
-
-											{project.codeLink && (
-												<a
-													href={project.codeLink}
-													target="_blank"
-													rel="noopener noreferrer"
-													className="text-perfume-text/60 hover:text-perfume-text hover:underline flex items-center gap-1 ml-auto"
-												>
-													<span>Source Code</span>
-													<span>↗</span>
-												</a>
-											)}
-										</div>
-									</div>
-								</div>
-							);
-						})}
-					</div>
-				</div>
-
-				{/* ====================================================== */}
-				{/* DESKTOP / TABLET — Scroll Driven Horizontal Motion    */}
-				{/* ====================================================== */}
-				<div className="hidden md:flex relative items-center my-auto overflow-hidden">
-					<motion.div
-						ref={trackRef}
-						style={{ x }}
-						className="flex gap-6 md:gap-8 px-6 md:px-12 w-max"
-					>
-						{/* {filteredProjects.map((project) => { */}
-						{filteredProjects.map((project, index) => {
-							const imageSrc = getProjectImage(project);
-
-							return (
-								// <div
-								// 	key={project.id}
-								// 	className="group relative w-105 md:w-120 shrink-0 rounded-3xl border border-perfume-soft bg-perfume-surface p-5 md:p-6 overflow-hidden shadow-sm hover:border-perfume-primary/50 transition-all duration-300 flex flex-col justify-between"
-								// >
-								// 	{/* Image Container */}
-								// 	<div className="relative w-full h-48 md:h-60 rounded-2xl overflow-hidden mb-4 border border-perfume-soft/50 bg-perfume-bg">
-								// 		{imageSrc ? (
-								// 			<Image
-								// 				src={imageSrc}
-								// 				alt={project.title}
-								// 				fill
-								// 				sizes="(max-width: 768px) 420px, 480px"
-								// 				onError={() => handleImageError(project.id)}
-								// 				className="object-cover object-top transition-transform duration-700 group-hover:scale-105"
-								// 			/>
-								// 		) : (
-								// 			<div className="w-full h-full bg-linear-to-br from-rose-950/20 via-perfume-soft/40 to-perfume-surface flex items-center justify-center">
-								// 				<span className="text-4xl font-serif text-perfume-primary/40">
-								// 					/{project.id}
-								// 				</span>
-								// 			</div>
-								// 		)}
-
-								// 		{/* Tech Stack Chips Overlay */}
-								// 		<div className="absolute bottom-3 left-3 right-3 flex flex-wrap gap-1.5 z-10 pointer-events-none">
-								// 			{project.tags.map((tag) => (
-								// 				<span
-								// 					key={tag}
-								// 					className="dp-label px-2.5 py-1 rounded-md bg-black/60 backdrop-blur-md text-white/90 border border-white/10"
-								// 				>
-								// 					{tag}
-								// 				</span>
-								// 			))}
-								// 		</div>
-
-								// 		{/* External Link Indicator */}
-								// 		{project.link && (
-								// 			<a
-								// 				href={project.link}
-								// 				target="_blank"
-								// 				rel="noopener noreferrer"
-								// 				className="absolute top-3 right-3 w-9 h-9 rounded-full bg-black/50 backdrop-blur-md text-white flex items-center justify-center opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300 text-xs hover:bg-perfume-primary"
-								// 				aria-label={`Visit ${project.title}`}
-								// 			>
-								// 				↗
-								// 			</a>
-								// 		)}
-								// 	</div>
-
-								// 	{/* Card Main Body */}
-								// 	<div className="flex flex-col flex-1 justify-between">
-								// 		<div>
-								// 			<div className="flex justify-between items-center mb-1.5">
-								// 				<span className="dp-label uppercase tracking-[0.25em] font-medium text-perfume-primary">
-								// 					{project.category}
-								// 				</span>
-
-								// 				<span className="dp-label text-perfume-text/40">
-								// 					/{project.id}
-								// 				</span>
-								// 			</div>
-
-								// 			<h3 className="dp-card-title font-normal text-perfume-text mb-2 group-hover:text-perfume-primary transition-colors duration-300">
-								// 				{project.link ? (
-								// 					<a
-								// 						href={project.link}
-								// 						target="_blank"
-								// 						rel="noopener noreferrer"
-								// 						className="hover:underline"
-								// 					>
-								// 						{project.title}
-								// 					</a>
-								// 				) : (
-								// 					project.title
-								// 				)}
-								// 			</h3>
-								// 		</div>
-
-								// 		{/* Action Links */}
-								// 		<div className="flex items-center gap-3 pt-2 border-t border-perfume-soft/30 dp-label">
-								// 			{project.link && (
-								// 				<a
-								// 					href={project.link}
-								// 					target="_blank"
-								// 					rel="noopener noreferrer"
-								// 					className="text-perfume-primary hover:underline flex items-center gap-1"
-								// 				>
-								// 					<span>Live Site</span>
-								// 					<span>↗</span>
-								// 				</a>
-								// 			)}
-
-								// 			{project.codeLink && (
-								// 				<a
-								// 					href={project.codeLink}
-								// 					target="_blank"
-								// 					rel="noopener noreferrer"
-								// 					className="text-perfume-text/60 hover:text-perfume-text hover:underline flex items-center gap-1 ml-auto"
-								// 				>
-								// 					<span>Source Code</span>
-								// 					<span>↗</span>
-								// 				</a>
-								// 			)}
-								// 		</div>
-								// 	</div>
-								// </div>
-								<ProjectCard
-									key={project.id}
-									project={project}
-									imageSrc={imageSrc}
-									isActive={index === activeProjectIndex}
-									handleImageError={handleImageError}
-								/>
-							);
-						})}
-					</motion.div>
-				</div>
-			</div>
-		</section>
-	);
+  const [tab, setTab] = useState("professional");
+  const projects = allProjects.filter((p) => p.type === tab);
+  const [active, select] = useChapterSelection("work", projects.length);
+  const [errors, setErrors] = useState<Record<string, boolean>>({});
+  return (
+    <div className="scene-stage gallery-stage">
+      <div className="scene-heading">
+        <div>
+          <p className="eyebrow">[ THE COMPOSITIONS ]</p>
+          <h2>
+            Real-World <em>Work</em>
+          </h2>
+        </div>
+        <div className="gallery-tabs" aria-label="Project category">
+          {["professional", "personal"].map((t) => (
+            <button
+              type="button"
+              key={t}
+              aria-pressed={tab === t}
+              onClick={() => {
+                setTab(t);
+                select(0);
+              }}
+            >
+              {t === "professional" ? "Professional" : "Personal"} (
+              {allProjects.filter((p) => p.type === t).length})
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="gallery-space">
+        {allProjects.map((project) => (
+          <article
+            className="gallery-project"
+            key={project.id}
+            data-visible={
+              project.type === tab &&
+              active === projects.findIndex((p) => p.id === project.id)
+            }
+            aria-label={project.title}
+          >
+            <div className="project-window">
+              <div className="window-chrome">
+                <span className="identity-dots">
+                  <i />
+                  <i />
+                  <i />
+                </span>
+                <span>{project.category}</span>
+                <span>/{project.id}</span>
+              </div>
+              <div className="project-image">
+                {project.customImage && !errors[project.id] ? (
+                  <Image
+                    src={project.customImage}
+                    alt={project.title}
+                    fill
+                    sizes="(max-width: 767px) 90vw, 58vw"
+                    className="object-cover object-top"
+                    onError={() =>
+                      setErrors((p) => ({ ...p, [project.id]: true }))
+                    }
+                  />
+                ) : (
+                  <div className="project-monogram">
+                    <span>/{project.id}</span>
+                    <p>{project.title}</p>
+                  </div>
+                )}
+                {project.link && (
+                  <a
+                    className="image-visit"
+                    href={project.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={"Visit " + project.title}
+                  >
+                    ↗
+                  </a>
+                )}
+              </div>
+            </div>
+            <div className="project-story">
+              <p className="eyebrow">
+                {project.category} <span>/{project.id}</span>
+              </p>
+              <h3>
+                {project.link ? (
+                  <a
+                    href={project.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {project.title}
+                  </a>
+                ) : (
+                  project.title
+                )}
+              </h3>
+              {project.description && (
+                <p className="project-description">{project.description}</p>
+              )}
+              <div className="project-tags">
+                {project.tags.map((tag) => (
+                  <span key={tag}>{tag}</span>
+                ))}
+              </div>
+              <div className="project-links">
+                {project.link && (
+                  <a
+                    href={project.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Live Site ↗
+                  </a>
+                )}
+                {project.codeLink && (
+                  <a
+                    href={project.codeLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Source Code ↗
+                  </a>
+                )}
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+      <div className="gallery-controls">
+        <p className="gallery-count" aria-live="polite">
+          {String(active + 1).padStart(2, "0")}{" "}
+          <span>/ {String(projects.length).padStart(2, "0")}</span>
+        </p>
+        <div className="gallery-index" aria-label="Choose a project">
+          {projects.map((p, i) => (
+            <button
+              type="button"
+              key={p.id}
+              aria-label={p.title}
+              aria-pressed={i === active}
+              onClick={() => select(i)}
+            >
+              {String(i + 1).padStart(2, "0")}
+            </button>
+          ))}
+        </div>
+        <div className="gallery-arrows">
+          <button
+            type="button"
+            aria-label="Previous project"
+            disabled={active === 0}
+            onClick={() => select(active - 1)}
+          >
+            ←
+          </button>
+          <button
+            type="button"
+            aria-label="Next project"
+            disabled={active === projects.length - 1}
+            onClick={() => select(active + 1)}
+          >
+            →
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 }

@@ -13,18 +13,27 @@ export default function SmoothScroll({
 	useEffect(() => {
 		gsap.registerPlugin(ScrollTrigger);
 
-		// Initialize smooth scrolling with fluid physics
-		const lenis = new Lenis({
-			duration: 1.4,
+		const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+		let lenis: Lenis | undefined;
+		const setup = () => {
+			lenis?.destroy();
+			lenis = undefined;
+			if (media.matches || document.documentElement.dataset.motion === "reduced") return;
+			lenis = new Lenis({
+			duration: 1.1,
 			easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
 			smoothWheel: true,
 			anchors: true,
 		});
 
-		lenis.on("scroll", ScrollTrigger.update);
+			lenis.on("scroll", ScrollTrigger.update);
+		};
+		setup();
+		media.addEventListener("change", setup);
+		window.addEventListener("experience-motion", setup);
 
 		const updateLenis = (time: number) => {
-			lenis.raf(time * 1000);
+			lenis?.raf(time * 1000);
 		};
 
 		gsap.ticker.add(updateLenis);
@@ -32,7 +41,9 @@ export default function SmoothScroll({
 
 		return () => {
 			gsap.ticker.remove(updateLenis);
-			lenis.destroy();
+			media.removeEventListener("change", setup);
+			window.removeEventListener("experience-motion", setup);
+			lenis?.destroy();
 		};
 	}, []);
 

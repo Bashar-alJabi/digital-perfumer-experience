@@ -1,7 +1,7 @@
 "use client";
 
 import { useForm, ValidationError } from "@formspree/react";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import React, { useState } from "react";
 
 interface ServiceOption {
@@ -82,7 +82,7 @@ export default function ContactSection() {
 	};
 
 	return (
-		<section className="relative py-28 md:py-36 px-6 md:px-12 bg-perfume-bg text-perfume-text border-t border-perfume-soft/40 overflow-hidden">
+		<section className="contact-stage relative py-28 md:py-36 px-6 md:px-12 bg-perfume-bg text-perfume-text border-t border-perfume-soft/40 overflow-hidden">
 			<div className="max-w-7xl mx-auto">
 				{/* Main Contact Container */}
 				<div className="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-20 items-start">
@@ -170,7 +170,7 @@ export default function ContactSection() {
 						className="lg:col-span-7"
 					>
 						{/* <div className="rounded-3xl border border-perfume-soft bg-perfume-surface p-8 md:p-12 shadow-sm"> */}
-						<div className="relative rounded-3xl bg-perfume-surface p-8 md:p-12 shadow-sm overflow-hidden">
+						<div className="contact-vessel relative rounded-3xl bg-perfume-surface p-8 md:p-12 shadow-sm overflow-hidden">
 							{/* Rotating border */}
 							{/* Rotating border */}
 							<svg
@@ -346,6 +346,11 @@ export default function ContactSection() {
 										</p>
 									)} */}
 
+									{state.errors?.getFormErrors().map((error) => (
+										<p key={error.code} role="alert" className="dp-small text-perfume-primary">
+											{error.message}
+										</p>
+									))}
 									{/* Submit Button */}
 									<button
 										type="submit"
