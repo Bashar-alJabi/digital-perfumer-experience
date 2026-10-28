@@ -27,8 +27,8 @@ export default function PhilosophyStage(){
       }else if(title){
         title.style.removeProperty("transform");title.style.removeProperty("opacity");
       }
-      const anchors=cards.map(card=>{
-        const dot=card.querySelector<HTMLElement>('[title="Top Note"],[title="Heart Note"],[title="Base Note"]');
+      const anchors=cards.map((card,i)=>{
+        const dot=card.querySelector<HTMLElement>(`[title="${["Top Note","Heart Note","Base Note"][i]}"]`);
         const r=(dot??card).getBoundingClientRect();
         return {x:r.left+r.width/2,y:r.top+r.height/2};
       });
