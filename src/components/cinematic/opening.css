@@ -96,3 +96,32 @@
   #philosophy .philosophy-connection{display:none}
   #philosophy .space-y-8>div{transition:none}
 }
+
+/* Directed depth reveal — the actual content plane assembles in camera space.
+   Separate the card shell from its contents so text stays sharply legible. */
+@media(min-width:768px) and (prefers-reduced-motion:no-preference){
+  #philosophy .space-y-8>div>.relative{
+    transform:perspective(1300px)
+      translate3d(calc(var(--cn-depth,0) * 80px),calc(var(--cn-depth,0) * 86px),calc(var(--cn-depth,0) * -260px))
+      rotateY(calc(var(--cn-depth,0) * -18deg))
+      rotateX(calc(var(--cn-depth,0) * 12deg))!important;
+    opacity:clamp(0,calc(1 - var(--cn-depth,0) * 1.35),1)!important;
+    filter:blur(calc(var(--cn-depth,0) * 2px));
+    transform-origin:20% 50%;
+    will-change:transform,opacity;
+  }
+  #philosophy .space-y-8>div{
+    transform:perspective(1450px)
+      translate3d(calc(var(--cn-depth,0) * 46px),calc(var(--cn-depth,0) * 36px),calc(var(--cn-depth,0) * -155px))
+      rotateY(calc(var(--cn-depth,0) * -8deg))!important;
+    opacity:clamp(.03,calc(1 - var(--cn-depth,0) * 1.55),1)!important;
+    transition:box-shadow .2s linear,border-color .2s linear!important;
+    transform-origin:15% 45%;
+  }
+  #philosophy .space-y-8>div:nth-child(2){
+    transform-origin:80% 45%;
+  }
+  #philosophy .space-y-8>div:nth-child(3){
+    transform-origin:40% 45%;
+  }
+}
