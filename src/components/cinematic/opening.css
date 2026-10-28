@@ -241,3 +241,9 @@
   #philosophy .note-morph-card .note-morph-content{transform:none!important;opacity:1!important;filter:none!important}
   #philosophy .philosophy-manifesto{transform:none!important;opacity:1!important;filter:none!important}
 }
+
+/* One sculpted note at a time; other notes are absent, not stacked in the same place. */
+@media(min-width:768px) and (prefers-reduced-motion:no-preference){
+  #philosophy .note-morph-card{opacity:var(--note-presence,0)!important;visibility:visible!important;}
+  #philosophy .note-morph-card:not([data-note-active="true"]){pointer-events:none}
+}
