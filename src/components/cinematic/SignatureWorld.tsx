@@ -212,8 +212,14 @@ function FrameEnergy({flow}:{flow:React.RefObject<JourneyState>}) {
     ref.current.rotation.y=morph(ref.current.rotation.y,active?(f.local-.5)*.34:0,.08);
   });
   return <group ref={ref}>
-    <mesh position={[0,0,0]}><torusGeometry args={[2.3,.02,8,4]}/><meshBasicMaterial color="#f36371" transparent opacity={.7}/></mesh>
-    <mesh rotation={[0,0,.785]}><ringGeometry args={[2.7,2.72,4]}/><meshBasicMaterial color="#ffd8df" transparent opacity={.36} side={THREE.DoubleSide}/></mesh>
+    <lineSegments>
+      <edgesGeometry args={[new THREE.BoxGeometry(4.4,2.8,.28)]}/>
+      <lineBasicMaterial color="#f36371" transparent opacity={.56} depthWrite={false}/>
+    </lineSegments>
+    <mesh position={[0,1.42,.12]}>
+      <boxGeometry args={[.52,.025,.025]}/>
+      <meshBasicMaterial color="#fff1f5" transparent opacity={.64}/>
+    </mesh>
   </group>;
 }
 
