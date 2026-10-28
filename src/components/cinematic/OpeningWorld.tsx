@@ -19,26 +19,23 @@ function Pearl({index,progress,ready,source,targets,blend}:{index:number;progres
   }),[index]);
   useFrame(({clock,camera},delta)=>{
     if(!root.current)return;
-    const p=progress.current,entry=ease(0,.12,p),exit=ease(.34,.88,p);
+    const p=progress.current,entry=ease(0,.12,p);
     const position=new THREE.Vector3(
       (index-1)*1.75+Math.sin(clock.elapsedTime*.38+index*2)*.11,
       Math.sin(index*2.1+clock.elapsedTime*.34)*.32,
       index===1?1.25:index===2?-.42:.28
     );
-    position.x+=(index-1)*exit*.72;
-    position.y+=exit*(index===0?1.55:index===1?-.12:-1.65);
-    position.z+=exit*(index===0?.4:index===1?-1:.8);
     const alpha=1-Math.exp(-delta*5.4);
     root.current.position.lerp(position,alpha);
     source.current[index].copy(root.current.position);
     root.current.rotation.y+=delta*.21;
     root.current.rotation.z=Math.sin(clock.elapsedTime*.34+index)*.11;
-    const philosophyFade=ease(0,.85,blend.current);
-    const scale=(.69+index*.06)*(1-ease(.72,1,p)*.4)*(1-philosophyFade)*ready.current;
+    const philosophyFade=ease(0,.75,blend.current);
+    const scale=(.69+index*.06)*(1-ease(.72,1,p)*.2)*(1-philosophyFade)*ready.current;
     root.current.scale.setScalar(THREE.MathUtils.lerp(root.current.scale.x,scale,alpha));
     if(trail.current){
       trail.current.scale.setScalar(1.4+entry*.25);
-      (trail.current.material as THREE.MeshBasicMaterial).opacity=(.13+.08*entry)*(1-exit);
+      (trail.current.material as THREE.MeshBasicMaterial).opacity=(.13+.08*entry)*(1-philosophyFade);
     }
   });
   return <group ref={root}>
