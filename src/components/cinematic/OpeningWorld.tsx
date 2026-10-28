@@ -8,12 +8,11 @@ import "./opening.css";
 const clamp=(x:number)=>Math.max(0,Math.min(1,x));
 const ease=(a:number,b:number,x:number)=>{const t=clamp((x-a)/(b-a));return t*t*(3-2*t)};
 const COLORS=["#f36371","#ffc3d3","#262029"];
-type Director={hero:number;entry:number;stage:number;anchor:[number,number];};
+type Director={hero:number;entry:number;stage:number;anchor:[number,number];settle:[number,number];};
 const INITIAL:[number,number,number][]=[[-1.75,0,.28],[0,0,1.25],[1.75,0,-.42]];
 
 function Note({index,director,ready}:{index:number;director:React.RefObject<Director>;ready:React.RefObject<number>}){
   const group=useRef<THREE.Group>(null);
-  const ring=useRef<THREE.Mesh>(null);
   const material=useMemo(()=>new THREE.MeshPhysicalMaterial({
     color:COLORS[index],metalness:index===2?.45:.1,roughness:.12,clearcoat:1,
     clearcoatRoughness:.08,ior:1.45,thickness:.8,transmission:index===2?0:.16,
@@ -21,47 +20,57 @@ function Note({index,director,ready}:{index:number;director:React.RefObject<Dire
   useFrame(({clock,camera},dt)=>{
     if(!group.current)return;
     const d=director.current;
-    const sceneCamera=camera as THREE.PerspectiveCamera;
+    const c=camera as THREE.PerspectiveCamera;
     const phase=Math.min(2,Math.floor(d.stage*3));
-    const local=d.stage===1?1:d.stage*3-phase;
-    const arrange=ease(0,1,d.entry);
-    // Hero: a horizontal signature. Transition: a genuine vertical constellation,
-    // ordered coral -> pink -> dark, travelling into Philosophy as a single motif.
+    const local=d.stage>=1?1:d.stage*3-phase;
+    const columnProgress=ease(0,1,d.entry);
     const hero=new THREE.Vector3(...INITIAL[index]);
-    hero.x+=Math.sin(clock.elapsedTime*.28+index*1.8)*.07*(1-arrange);
-    hero.y+=Math.sin(clock.elapsedTime*.33+index)*.12*(1-arrange);
-    const column=new THREE.Vector3(-.15,1.9-index*1.8,.5);
-    const destination=hero.clone().lerp(column,arrange);
-    // Destination is the exact center of the ONE shared card slot.
-    const depth=2.2;
-    const distance=sceneCamera.position.z-depth;
-    const halfH=Math.tan(THREE.MathUtils.degToRad(sceneCamera.fov*.5))*distance;
-    const halfW=halfH*sceneCamera.aspect;
-    const cardTarget=new THREE.Vector3(d.anchor[0]*halfW+sceneCamera.position.x,
-      -d.anchor[1]*halfH+sceneCamera.position.y,depth);
-    // Only the current sphere flies from vertical formation to its card.
-    const arrival=index===phase?ease(0,.21,local):index<phase?1:0;
-    if(index===phase)destination.lerp(cardTarget,arrival);
-    else if(index<phase)destination.lerp(cardTarget,1);
-    const unfold=index===phase?ease(.16,.36,local):index<phase?1:0;
-    const visibility=index<phase?0:index===phase?1-unfold:1;
-    const fadeToNext=index===phase?1-ease(.8,.97,local):1;
-    const alpha=1-Math.exp(-Math.min(dt,.05)*5.8);
+    hero.x+=Math.sin(clock.elapsedTime*.27+index*1.7)*.07*(1-columnProgress);
+    hero.y+=Math.sin(clock.elapsedTime*.3+index)*.11*(1-columnProgress);
+    // All three travel BEHIND the presentation slot as a single ordered column.
+    // The inactive notes are deliberately small and deep, not hanging at its edge.
+    const depth=-1.2;
+    const distance=c.position.z-depth;
+    const halfH=Math.tan(THREE.MathUtils.degToRad(c.fov*.5))*distance;
+    const halfW=halfH*c.aspect;
+    const behind=new THREE.Vector3(d.anchor[0]*halfW+c.position.x,
+      -d.anchor[1]*halfH+c.position.y+(.75-index*.75),depth);
+    const destination=hero.clone().lerp(behind,columnProgress);
+    const toWorld=(screen:[number,number],z:number)=>{
+      const delta=c.position.z-z;
+      const hh=Math.tan(THREE.MathUtils.degToRad(c.fov*.5))*delta;
+      return new THREE.Vector3(screen[0]*hh*c.aspect+c.position.x,-screen[1]*hh+c.position.y,z);
+    };
+    const card=toWorld(d.anchor,2.1);
+    const row=toWorld(d.settle,2.7);
+    row.x+=(index-1)*.58;
+    // On its own turn: approach, become card, fold back into a small note,
+    // then descend into the growing horizontal three-note signature.
+    let sphereSize=1;
+    if(index<phase){
+      destination.copy(row);
+      sphereSize=.24;
+    }else if(index===phase){
+      const approach=ease(.015,.19,local);
+      const forming=ease(.18,.34,local);
+      const release=ease(.73,.95,local);
+      destination.lerp(card,approach);
+      destination.lerp(row,release);
+      sphereSize=(1-forming)*(.9-.64*release)+release*.24;
+    }else{
+      sphereSize=.52;
+    }
+    const alpha=1-Math.exp(-Math.min(dt,.05)*7);
     group.current.position.lerp(destination,alpha);
-    group.current.rotation.y+=dt*.17;
-    const targetScale=(.68+index*.055)*visibility*fadeToNext*ready.current;
-    group.current.scale.setScalar(THREE.MathUtils.lerp(group.current.scale.x,targetScale,alpha));
-    if(ring.current)(ring.current.material as THREE.MeshBasicMaterial).opacity=.16*visibility*fadeToNext;
+    group.current.rotation.y+=dt*.18;
+    const scale=(.69+index*.055)*sphereSize*ready.current;
+    group.current.scale.setScalar(THREE.MathUtils.lerp(group.current.scale.x,scale,alpha));
   });
   return <group ref={group}>
     <mesh material={material}><sphereGeometry args={[.8,40,28]}/></mesh>
     <mesh position={[-.18,.23,.57]} scale={[.25,.36,.08]}>
       <sphereGeometry args={[1,16,12]}/>
       <meshBasicMaterial color="#fffaff" transparent opacity={.38} depthWrite={false}/>
-    </mesh>
-    <mesh ref={ring} rotation={[1.14,.3,index*.45]}>
-      <torusGeometry args={[1.04,.012,6,80]}/>
-      <meshBasicMaterial color={COLORS[index]} transparent opacity={.16} depthWrite={false}/>
     </mesh>
   </group>;
 }
@@ -92,7 +101,7 @@ function Scene({director,ready}:{director:React.RefObject<Director>;ready:React.
   </>;
 }
 export default function OpeningWorld(){
-  const director=useRef<Director>({hero:0,entry:0,stage:0,anchor:[.44,0]});
+  const director=useRef<Director>({hero:0,entry:0,stage:0,anchor:[.44,0],settle:[.44,.64]});
   const ready=useRef(1);
   const [reduced,setReduced]=useState(false);
   useEffect(()=>{
@@ -117,7 +126,11 @@ export default function OpeningWorld(){
       d.stage=clamp(-p.top/Math.max(1,p.height-h));
       const slot=philosophy.querySelector<HTMLElement>("[data-philosophy-target]");
       const point=slot?.getBoundingClientRect();
-      if(point)d.anchor=[(point.left+point.width*.5)/innerWidth*2-1,(point.top+point.height*.5)/h*2-1];
+      if(point){
+        const cx=point.left+point.width*.5;
+        d.anchor=[cx/innerWidth*2-1,(point.top+point.height*.5)/h*2-1];
+        d.settle=[cx/innerWidth*2-1,(point.bottom+Math.min(55,h*.07))/h*2-1];
+      }
       const show=clamp((p.bottom-h*.1)/(h*.55));
       hero.style.setProperty("--opening-progress",String(d.hero));
       hero.style.setProperty("--opening-world-visibility",String(show));
