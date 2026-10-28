@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+
 import PhilosophyStage from "@/components/cinematic/PhilosophyStage";
 
 const notes = [
@@ -37,16 +37,12 @@ export default function PhilosophySection() {
 	return (
 		<section className="relative px-6 py-32 text-perfume-text md:px-12 md:py-44">
 			<PhilosophyStage />
-			<div className="mx-auto max-w-7xl">
+			<div className="philosophy-inner mx-auto max-w-7xl">
 				{/* Philosophy */}
 				<div className="grid items-start gap-16 lg:grid-cols-2 lg:gap-24">
 					{/* Left Sticky Manifesto Title */}
-					<motion.div
-						initial={{ opacity: 0, y: 40 }}
-						whileInView={{ opacity: 1, y: 0 }}
-						viewport={{ once: true }}
-						transition={{ duration: 1, ease: "easeOut" }}
-						className="h-fit lg:sticky lg:top-32"
+					<div
+						className="philosophy-manifesto h-fit lg:sticky lg:top-32"
 					>
 						<p className="dp-label font-semibold uppercase tracking-[0.4em] text-perfume-text/60">
 							The Philosophy
@@ -63,30 +59,23 @@ export default function PhilosophySection() {
 								digital scents.
 							</span>
 						</h2>
-					</motion.div>
+					</div>
 
 					{/* Notes */}
-					<div className="space-y-8">
+					<div className="space-y-8 philosophy-notes">
 						{notes.map((note, cardIndex) => (
 							<motion.div
 								key={note.number}
-								initial={{ opacity: 0, y: 40 }}
-								whileInView={{ opacity: 1, y: 0 }}
-								viewport={{ once: true }}
-								transition={{
-									duration: 0.8,
-									delay: cardIndex * 0.15,
-								}}
-								className="relative overflow-hidden rounded-3xl border border-perfume-soft bg-perfume-surface p-8 shadow-sm transition-colors duration-500 hover:border-perfume-primary/30 md:p-12"
+								className="note-morph-card relative overflow-hidden rounded-3xl border border-perfume-soft bg-perfume-surface p-8 shadow-sm md:p-12"
 							>
 								{/* Background Number */}
-								<div className="pointer-events-none absolute -top-6 right-6 select-none font-serif text-[120px] font-bold tracking-tighter text-perfume-primary/10">
+								<div className="note-morph-number pointer-events-none absolute -top-6 right-6 select-none font-serif text-[120px] font-bold tracking-tighter text-perfume-primary/10">
 									{note.number}
 								</div>
 
-								<div className="relative z-10">
+								<div className="note-morph-content relative z-10">
 									{/* Signature Dots */}
-									<div className="mb-8 flex items-center gap-4">
+									<div className="note-morph-dots mb-8 flex items-center gap-4">
 										{signatureDots.map((dot, dotIndex) => {
 											const isActive = dotIndex === cardIndex;
 
@@ -118,7 +107,7 @@ export default function PhilosophySection() {
 										{note.text}
 									</p>
 								</div>
-							</motion.div>
+							</div>
 						))}
 					</div>
 				</div>
