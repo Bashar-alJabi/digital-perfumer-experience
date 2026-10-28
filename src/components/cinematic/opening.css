@@ -1,0 +1,78 @@
+/* HERO: original particle background retained, R3F world above it. */
+#home{--opening-progress:0;--opening-world-visibility:1;height:180vh;position:relative}
+#home>section{position:sticky;top:0;background:transparent!important;isolation:auto}
+#home .opening-original-background{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.88}
+#home .opening-original-background canvas{pointer-events:none!important}
+#home .opening-world{position:fixed;inset:0;z-index:1;overflow:hidden;pointer-events:none;opacity:var(--opening-world-visibility);background:transparent}
+.opening-world canvas{position:absolute!important;inset:0;pointer-events:none}
+.opening-ambient{position:absolute;inset:0;background:radial-gradient(ellipse 55% 45% at 50% 65%,#f6a8bf12,transparent 78%)}
+.opening-vignette{position:absolute;inset:0;background:radial-gradient(ellipse 90% 75% at 50% 55%,transparent 60%,#ffeff545)}
+#home .opening-copy{position:relative;z-index:3;transform:perspective(1400px) translate3d(0,calc(var(--opening-progress) * -160px),calc(var(--opening-progress) * 220px)) rotateX(calc(var(--opening-progress) * -16deg));opacity:clamp(0,calc(1 - var(--opening-progress) * 1.9),1);text-shadow:0 2px 22px #fff4f9d8}
+#home .opening-dots{transform:translateY(calc(var(--opening-progress) * -35px)) scale(calc(1 - var(--opening-progress) * .45));opacity:clamp(0,calc(1 - var(--opening-progress) * 1.2),1)}
+/* PHILOSOPHY: single slot, not stacked cards; card's origin is a circle. */
+#philosophy{height:430vh;position:relative;z-index:2;margin-top:-12vh;isolation:isolate;--morph-progress:0}
+#philosophy>section{height:100%;padding:0;background:transparent}
+.philosophy-morph-stage{position:sticky;top:0;height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.philosophy-morph-layout{width:min(1300px,94vw);display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:clamp(42px,7vw,120px);align-items:center;padding:80px 30px}
+.philosophy-manifesto{position:relative;transform:perspective(1450px) translate3d(calc(var(--manifesto-depth,0) * -90px),calc(var(--manifesto-depth,0) * 30px),calc(var(--manifesto-depth,0) * -240px)) rotateY(calc(var(--manifesto-depth,0) * 15deg));opacity:clamp(.2,calc(1 - var(--manifesto-depth,0) * .75),1);transform-origin:30% 50%}
+.philosophy-morph-slot{height:min(67vh,580px);min-height:420px;position:relative;display:flex;align-items:center;justify-content:center;perspective:1300px}
+.philosophy-morph-card{--morph-open:0;--morph-text:0;--morph-visibility:0;position:absolute;width:min(100%,580px);min-height:395px;isolation:isolate;overflow:hidden;border:1px solid #ffffff77;padding:clamp(28px,3.6vw,52px);border-radius:28px;box-shadow:0 30px 90px rgba(83,33,55,.16);opacity:var(--morph-visibility);transform:perspective(1400px) translate3d(0,calc((1 - var(--morph-open)) * 25px),calc((1 - var(--morph-open)) * 70px)) rotateY(calc((1 - var(--morph-open)) * -18deg));clip-path:circle(calc(4.5% + var(--morph-open) * 120%) at 50% 50%);will-change:clip-path,transform;background:var(--morph-bg);pointer-events:none}
+.philosophy-morph-card.note-top{--morph-bg:radial-gradient(ellipse at 35% 15%,#ffe0e7,#f8a4b5 52%,#eb6c80);--ink:#321e27}
+.philosophy-morph-card.note-heart{--morph-bg:radial-gradient(ellipse at 30% 15%,#fffafd,#ffe3ec 52%,#f5b1c8);--ink:#30212a}
+.philosophy-morph-card.note-base{--morph-bg:radial-gradient(ellipse at 30% 10%,#6d515c,#33252e 60%,#1b1920);--ink:#fff1f6}
+.philosophy-morph-body{position:relative;color:var(--ink);opacity:var(--morph-text);transform:perspective(1100px) translate3d(0,calc((1 - var(--morph-text)) * 42px),calc((1 - var(--morph-text)) * -130px)) rotateX(calc((1 - var(--morph-text)) * 15deg));filter:blur(calc((1 - var(--morph-text)) * 3px));}
+.philosophy-morph-body h3,.philosophy-morph-body p{color:var(--ink)}
+.philosophy-morph-number{position:absolute;right:-12px;top:-58px;font-size:130px;opacity:.13;font-family:serif}
+.philosophy-note-dots{display:flex;gap:12px;margin-bottom:28px}
+.philosophy-note-dots span{width:12px;height:12px;border-radius:50%;background:#f36371}
+.philosophy-note-dots span:nth-child(2){background:#ffc3d3}
+.philosophy-note-dots span:nth-child(3){background:#262029}
+#formula{position:relative;z-index:2}
+@media(max-width:767px){
+  #home{height:135vh}
+  #home .opening-world{opacity:calc(var(--opening-world-visibility) * .7)}
+  #home .opening-copy{transform:translateY(calc(var(--opening-progress) * -50px));opacity:clamp(0,calc(1 - var(--opening-progress) * 1.2),1)}
+  #philosophy{height:auto;margin-top:0}
+  #philosophy>section{height:auto;padding:80px 24px}
+  .philosophy-morph-stage{position:relative;height:auto;overflow:visible}
+  .philosophy-morph-layout{display:flex;flex-direction:column;gap:48px;padding:0;width:100%}
+  .philosophy-manifesto{transform:none;opacity:1}
+  .philosophy-morph-slot{height:auto;min-height:0;display:flex;flex-direction:column;gap:24px;width:100%}
+  .philosophy-morph-card{position:relative;width:100%;min-height:0;opacity:1;clip-path:none;transform:none}
+  .philosophy-morph-body{opacity:1;transform:none;filter:none}
+}
+@media(prefers-reduced-motion:reduce){
+  #home{height:auto}#home>section{position:relative}#home .opening-world{display:none}
+  #home .opening-copy,#home .opening-dots{transform:none;opacity:1}
+  #philosophy{height:auto;margin:0}#philosophy>section{height:auto;padding:90px 24px}
+  .philosophy-morph-stage{position:relative;height:auto;overflow:visible}
+  .philosophy-morph-layout{display:flex;flex-direction:column;gap:40px}
+  .philosophy-manifesto{transform:none;opacity:1}
+  .philosophy-morph-slot{height:auto;min-height:0;display:grid;gap:24px}
+  .philosophy-morph-card{position:relative;opacity:1;clip-path:none;transform:none}
+  .philosophy-morph-body{opacity:1;transform:none;filter:none}
+}
+
+/* The stage is the inner section: it must span the entire 430vh scroll runway.
+   Its child remains sticky so the camera sees a single changing screen. */
+@media(min-width:768px) and (prefers-reduced-motion:no-preference){
+  #philosophy>section{height:100%!important;min-height:0!important;position:relative;padding:0!important}
+  #philosophy .philosophy-morph-stage{position:sticky!important;top:0!important;height:100vh!important;max-height:100vh!important}
+  #philosophy .philosophy-morph-card{backface-visibility:hidden;transform-style:preserve-3d}
+}
+
+/* The single presentation card has a deliberate clear landing strip below it.
+   The three 3D notes collect in that strip before handing off to Formula. */
+@media(min-width:768px) and (prefers-reduced-motion:no-preference){
+  .philosophy-morph-slot{height:min(74vh,660px)!important;padding-bottom:68px!important;box-sizing:border-box}
+  .philosophy-morph-card{margin-top:-48px!important}
+  .philosophy-manifesto>p{
+    opacity:var(--manifesto-progress,0);
+    transform:translate3d(0,calc((1 - var(--manifesto-progress,0))*-22px),calc((1 - var(--manifesto-progress,0))*-60px));
+  }
+  .philosophy-manifesto>h2{
+    opacity:var(--manifesto-progress,0);
+    transform:perspective(1100px) translate3d(0,calc((1 - var(--manifesto-progress,0))*48px),calc((1 - var(--manifesto-progress,0))*-155px)) rotateX(calc((1 - var(--manifesto-progress,0))*13deg));
+    transform-origin:40% 50%;
+  }
+}
