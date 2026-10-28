@@ -1,10 +1,11 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 /** A shared viewport clock for real Philosophy text/cards. Scroll remains reversible;
  * original words and interactive cards are never cloned into a competing canvas.
  */
 export default function PhilosophyStage(){
+  const pathRefs=useRef<(SVGPathElement|null)[]>([]);
   useEffect(()=>{
     const section=document.getElementById("philosophy");
     if(!section)return;
@@ -26,6 +27,22 @@ export default function PhilosophyStage(){
       }else if(title){
         title.style.removeProperty("transform");title.style.removeProperty("opacity");
       }
+      const anchors=cards.map(card=>{
+        const dot=card.querySelector<HTMLElement>('[title="Top Note"],[title="Heart Note"],[title="Base Note"]');
+        const r=(dot??card).getBoundingClientRect();
+        return {x:r.left+r.width/2,y:r.top+r.height/2};
+      });
+      pathRefs.current.forEach((path,i)=>{
+        if(!path||!anchors[i]||!anchors[i+1])return;
+        const a=anchors[i],b=anchors[i+1];
+        const bend=Math.min(70,Math.abs(b.y-a.y)*.22);
+        path.setAttribute("d",`M ${a.x} ${a.y} C ${a.x-bend} ${a.y+35}, ${b.x-bend} ${b.y-35}, ${b.x} ${b.y}`);
+        const len=path.getTotalLength();
+        const drawing=clamp((prog-(i===0?.24:.52))/.23);
+        path.style.strokeDasharray=`${len}`;
+        path.style.strokeDashoffset=String(len*(1-drawing));
+        path.style.opacity=String(clamp((h*.92-r.top)/h)*.8);
+      });
       cards.forEach((card,i)=>{
         const bounds=card.getBoundingClientRect();
         const appear=clamp((h*.9-bounds.top)/(h*.46));
@@ -47,5 +64,8 @@ export default function PhilosophyStage(){
       section.style.removeProperty("--philosophy-progress");
     };
   },[]);
-  return null;
+  return <svg className="philosophy-connection" aria-hidden="true" focusable="false">
+    <path ref={el=>{pathRefs.current[0]=el}} stroke="#f36371"/>
+    <path ref={el=>{pathRefs.current[1]=el}} stroke="#ffc3d3"/>
+  </svg>;
 }
