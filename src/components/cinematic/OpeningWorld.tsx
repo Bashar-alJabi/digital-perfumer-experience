@@ -8,6 +8,39 @@ import "./opening.css";
 const clamp=(x:number)=>Math.min(1,Math.max(0,x));
 const ease=(a:number,b:number,x:number)=>{const t=clamp((x-a)/(b-a));return t*t*(3-2*t)};
 const COLORS=["#f36371","#ffc3d3","#262029"];
+/** The filament connects note centers, with its geometry rebuilt from the actual
+ * sphere coordinates. The second segment is drawn only after the first one.
+ * No free-floating tubes or trailing streaks. */
+function SignatureConnection({positions,progress,ready}:{positions:React.RefObject<THREE.Vector3[]>;progress:React.RefObject<number>;ready:React.RefObject<number>}){
+  const lines=useMemo(()=>[0,1].map(i=>{
+    const geometry=new THREE.BufferGeometry();
+    geometry.setAttribute("position",new THREE.BufferAttribute(new Float32Array(42*3),3));
+    geometry.setDrawRange(0,0);
+    const material=new THREE.LineBasicMaterial({color:COLORS[i],transparent:true,opacity:.7,depthWrite:false});
+    return new THREE.Line(geometry,material);
+  }),[]);
+  useFrame(()=>{
+    const progressValue=progress.current;
+    const reveal=[ease(.075,.32,progressValue),ease(.31,.58,progressValue)];
+    lines.forEach((line,i)=>{
+      const first=positions.current[i],second=positions.current[i+1];
+      const amount=reveal[i]*ready.current;
+      const attr=line.geometry.getAttribute("position") as THREE.BufferAttribute;
+      for(let j=0;j<42;j++){
+        const t=j/41,arc=Math.sin(t*Math.PI);
+        attr.setXYZ(j,
+          THREE.MathUtils.lerp(first.x,second.x,t),
+          THREE.MathUtils.lerp(first.y,second.y,t)+arc*.12,
+          THREE.MathUtils.lerp(first.z,second.z,t)-arc*.18
+        );
+      }
+      attr.needsUpdate=true;
+      line.geometry.setDrawRange(0,Math.max(0,Math.ceil(amount*42)));
+      line.visible=amount>.001;
+    });
+  });
+  return <>{lines.map((line,i)=><primitive key={i} object={line}/>)}</>;
+}
 function Pearl({index,progress,ready,source}:{index:number;progress:React.RefObject<number>;ready:React.RefObject<number>;source:React.RefObject<THREE.Vector3[]>}){
   const root=useRef<THREE.Group>(null);
   const trail=useRef<THREE.Mesh>(null);
@@ -78,6 +111,7 @@ function Scene({progress,ready}:{progress:React.RefObject<number>;ready:React.Re
     <pointLight position={[2,2,3]} color="#f36371" intensity={25} distance={12}/>
     <pointLight position={[-3,-1,2]} color="#ffffff" intensity={14} distance={9}/>
     {[0,1,2].map(i=><Pearl key={i} index={i} progress={progress} ready={ready} source={notePositions}/>)}
+    <SignatureConnection positions={notePositions} progress={progress} ready={ready}/>
     <points ref={cloud} geometry={dust}>
       <pointsMaterial color="#bd6b83" size={.026} opacity={.35} transparent depthWrite={false}/>
     </points>
