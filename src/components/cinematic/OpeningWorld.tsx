@@ -41,20 +41,20 @@ function Pearl({index,progress,ready}:{index:number;progress:React.RefObject<num
   }),[index]);
   useFrame(({clock},delta)=>{
     if(!root.current)return;
-    const p=progress.current,entry=ease(0,.12,p),exit=ease(.62,.98,p);
+    const p=progress.current,entry=ease(0,.12,p),exit=ease(.34,.88,p);
     const position=new THREE.Vector3(
       (index-1)*1.75+Math.sin(clock.elapsedTime*.38+index*2)*.11,
       Math.sin(index*2.1+clock.elapsedTime*.34)*.32,
       index===1?1.25:index===2?-.42:.28
     );
-    position.x+=(index-1)*exit*1.55;
-    position.y+=exit*(index===0?-2.8:index===1?.8:2.6);
+    position.x+=(index-1)*exit*.72;
+    position.y+=exit*(index===0?1.55:index===1?-.12:-1.65);
     position.z+=exit*(index===0?.4:index===1?-1:.8);
     const alpha=1-Math.exp(-delta*5.4);
     root.current.position.lerp(position,alpha);
     root.current.rotation.y+=delta*.21;
     root.current.rotation.z=Math.sin(clock.elapsedTime*.34+index)*.11;
-    const scale=(.69+index*.06)*(1-ease(.8,1,p)*.45)*ready.current;
+    const scale=(.69+index*.06)*(1-ease(.62,1,p)*.52)*ready.current;
     root.current.scale.setScalar(THREE.MathUtils.lerp(root.current.scale.x,scale,alpha));
     if(trail.current){
       trail.current.scale.setScalar(1.4+entry*.25);
@@ -85,7 +85,7 @@ function Scene({progress,ready}:{progress:React.RefObject<number>;ready:React.Re
   },[]);
   useFrame(({camera,clock},dt)=>{
     const p=progress.current;
-    camera.position.z=THREE.MathUtils.damp(camera.position.z,9.5-ease(.12,.95,p)*1.65,2.8,dt);
+    camera.position.z=THREE.MathUtils.damp(camera.position.z,9.5-ease(.06,.9,p)*2.15,2.8,dt);
     camera.position.y=THREE.MathUtils.damp(camera.position.y,ease(.25,.98,p)*.3,2.8,dt);
     camera.lookAt(0,0,0);
     if(cloud.current){
@@ -120,12 +120,16 @@ export default function OpeningWorld(){
   },[]);
   useEffect(()=>{
     const hero=document.getElementById("home");
-    if(!hero)return;
+    const philosophy=document.getElementById("philosophy");
+    if(!hero||!philosophy)return;
     let pending=0;
     const update=()=>{
       pending=0;
       const rect=hero.getBoundingClientRect();
-      progress.current=clamp(-rect.top/Math.max(1,rect.height));
+      const philosophyRect=philosophy.getBoundingClientRect();
+      progress.current=clamp(-rect.top/Math.max(1,rect.height-window.innerHeight*.2));
+      const show=clamp((philosophyRect.bottom-window.innerHeight*.1)/Math.max(1,window.innerHeight*.6));
+      hero.style.setProperty("--opening-world-visibility",show.toFixed(3));
       hero.style.setProperty("--opening-progress",progress.current.toFixed(4));
     };
     const onScroll=()=>{if(!pending)pending=requestAnimationFrame(update)};
