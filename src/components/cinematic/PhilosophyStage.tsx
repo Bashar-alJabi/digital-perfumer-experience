@@ -31,6 +31,7 @@ export default function PhilosophyStage(){
           card.style.removeProperty("opacity");
           card.style.removeProperty("visibility");
           card.style.removeProperty("z-index");
+          card.style.setProperty("--note-visible","1");
           card.style.setProperty("--note-unfold","1");
           card.style.setProperty("--note-text","1");
           card.setAttribute("data-note-active","true");
@@ -43,7 +44,7 @@ export default function PhilosophyStage(){
         const presence=smooth(0,.075,phase)*(1-smooth(.92,1,phase));
         card.style.display=active?"block":"none";
         card.style.visibility=active?"visible":"hidden";
-        card.style.opacity=active?String(presence):"0";
+        card.style.setProperty("--note-visible",active?String(presence):"0");
         card.style.zIndex=active?"5":"0";
         card.style.setProperty("--note-unfold",unfold.toFixed(4));
         card.style.setProperty("--note-text",text.toFixed(4));
@@ -67,7 +68,7 @@ export default function PhilosophyStage(){
       window.removeEventListener("scroll",tick);
       window.removeEventListener("resize",tick);
       cards.forEach(card=>{
-        for(const key of ["display","visibility","opacity","z-index","--note-unfold","--note-text"]){
+        for(const key of ["display","visibility","opacity","z-index","--note-unfold","--note-text","--note-visible"]){
           card.style.removeProperty(key);
         }
         card.removeAttribute("data-note-active");
