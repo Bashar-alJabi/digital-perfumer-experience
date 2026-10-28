@@ -1,0 +1,15 @@
+/* The original portfolio stays the content authority. This scene is a restrained optical layer. */
+#home{--opening-progress:0}
+#home>section{background:transparent!important;isolation:isolate;perspective:1400px}
+#home .opening-world{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none;background:radial-gradient(ellipse 50% 65% at 50% 68%,#fbd5e1 0%,#ffeff5 68%,#fff8fa 100%)}
+.opening-world canvas{position:absolute!important;inset:0;pointer-events:none}
+.opening-ambient{position:absolute;inset:0;background:radial-gradient(ellipse 24% 28% at 78% 25%,#fff9fbd9,transparent 80%),radial-gradient(ellipse 39% 35% at 13% 71%,#fca9c43e,transparent 85%)}
+.opening-vignette{position:absolute;inset:0;background:linear-gradient(180deg,#ffeff560,transparent 30%,transparent 70%,#ffeff5c5)}
+#home .opening-copy{position:relative;z-index:3;transform-style:preserve-3d;will-change:transform,opacity;transform:perspective(1200px) translate3d(0,calc(var(--opening-progress) * -110px),calc(var(--opening-progress) * 160px)) rotateX(calc(var(--opening-progress) * -11deg));opacity:calc(1 - var(--opening-progress) * 1.14);text-shadow:0 2px 22px #fff4f9d8}
+#home .opening-dots{transform:translateY(calc(var(--opening-progress) * -35px)) scale(calc(1 - var(--opening-progress) * .45));opacity:calc(1 - var(--opening-progress) * 1.2)}
+#home .opening-cta{transition:opacity .25s ease}
+#philosophy{perspective:1450px}
+#philosophy .space-y-8>div{transform-style:preserve-3d;backface-visibility:hidden;box-shadow:0 25px 72px #9a4f7220;transition:box-shadow .3s ease,border-color .3s ease}
+#philosophy .space-y-8>div:hover{box-shadow:0 35px 80px #9a4f7233}
+@media(max-width:767px){#home .opening-world{opacity:.62}#home .opening-copy{transform:none!important;opacity:1!important}#home .opening-dots{transform:none!important;opacity:1!important}}
+@media(prefers-reduced-motion:reduce){#home .opening-copy,#home .opening-dots{transform:none!important;opacity:1!important}#home .opening-world{display:none}}
