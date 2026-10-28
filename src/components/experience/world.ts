@@ -1,7 +1,7 @@
 import * as T from "three";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
-import { clamp, mix, type Frame } from "@/lib/experience/score";
+import { clamp, ease, mix, type Frame } from "@/lib/experience/score";
 
 const colors = ["#f36371", "#ffd8df", "#151015"];
 
@@ -222,10 +222,14 @@ export function createWorld(host: HTMLElement, onLost: () => void) {
     ...document.querySelectorAll<HTMLElement>(".achievement"),
   ];
   const memory = document.getElementById("memory");
+  const signature = document.getElementById("signature");
+  const landingDots = [
+    ...document.querySelectorAll<HTMLElement>(".signature-settle i"),
+  ];
   function draw(f: Frame, time: number) {
     if (w !== innerWidth || h !== innerHeight) resize();
     const mobile = w < 768;
-    host.dataset.noteForm = f.notes.map(p => p.morph.toFixed(2)).join(",");
+    host.dataset.noteForm = f.notes.map((p) => p.morph.toFixed(2)).join(",");
     notes.forEach((mesh, i) => {
       const p = f.notes[i];
       mesh.visible = p.alpha > 0.005;
@@ -234,6 +238,25 @@ export function createWorld(host: HTMLElement, onLost: () => void) {
         p.morph > 0.01 ? 0 : Math.sin(time * 0.7 + i * 1.9) * 0.025;
       mesh.position.y += breathing;
       mesh.scale.setScalar(mix(p.size, mobile ? 0.97 : 1, p.morph));
+      const landing = signature
+        ? ease((h * 0.25 - signature.getBoundingClientRect().top) / (h * 0.25))
+        : 0;
+      if (landing > 0 && landingDots[i]) {
+        const r = landingDots[i].getBoundingClientRect();
+        mesh.position.x = mix(
+          mesh.position.x,
+          ((r.left + r.width * 0.5 - w * 0.5) / w) * viewW,
+          landing,
+        );
+        mesh.position.y = mix(
+          mesh.position.y,
+          ((h * 0.5 - r.top - r.height * 0.5) / h) * viewH,
+          landing,
+        );
+        mesh.scale.setScalar(
+          mix(p.size, ((r.width / w) * viewW) / 1.7, landing),
+        );
+      }
       const geometry = mesh.geometry;
       if (geometry.userData.morph !== p.morph) {
         const positions = geometry.attributes.position,
@@ -258,7 +281,8 @@ export function createWorld(host: HTMLElement, onLost: () => void) {
       const m = mesh.material;
       m.transparent = p.alpha < 0.99;
       m.opacity = p.alpha;
-      m.roughness = mix(0.16, 0.48, p.morph);
+      m.roughness = mix(0.16, 0.65, p.morph);
+      m.clearcoat = mix(1, 0.05, p.morph);
       m.metalness = mix(0.34, 0.08, p.morph);
       m.envMapIntensity = mix(1.6, 0.4, p.morph);
       m.color

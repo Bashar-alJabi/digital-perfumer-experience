@@ -1056,7 +1056,7 @@ h3 em {
   background: #ffd8df;
 }
 .chapter-signature {
-  min-height: 65svh;
+  min-height: 100svh;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
@@ -1334,7 +1334,7 @@ header {
     letter-spacing: 0.1em;
   }
   .formula-ingredient p {
-    font-size: 8px;
+    font-size: 10px;
     gap: 0 8px;
     margin-top: 6px;
   }
@@ -1605,7 +1605,7 @@ header {
     margin-bottom: 22px;
   }
   .chapter-signature {
-    min-height: 60svh;
+    min-height: 100svh;
   }
   .chapter-signature footer {
     padding: 25px 24px 50px;

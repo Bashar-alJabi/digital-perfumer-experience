@@ -17,7 +17,13 @@ async function load(p) {
     },
   });
   return import(
-    "data:text/javascript;base64," + Buffer.from(outputText.replaceAll('from "three"', 'from '+JSON.stringify(import.meta.resolve("three")))).toString("base64")
+    "data:text/javascript;base64," +
+      Buffer.from(
+        outputText.replaceAll(
+          'from "three"',
+          "from " + JSON.stringify(import.meta.resolve("three")),
+        ),
+      ).toString("base64")
   );
 }
 
@@ -32,14 +38,23 @@ test("all original project, skill, philosophy and formula records survive unchan
     34,
   );
 });
-test("the shared note surface starts spherical and reaches the card bounds",async()=>{
-  const {noteGeometry}=await load('src/lib/experience/geometry.ts');
-  const g=noteGeometry(3,2),p=g.attributes.position;
-  for(let i=0;i<p.count;i++)assert.ok(Math.abs(Math.hypot(p.getX(i),p.getY(i),p.getZ(i))-.85)<.00001);
-  const card=g.userData.card;
-  const extents=[0,0,0];for(let i=0;i<card.length;i++)extents[i%3]=Math.max(extents[i%3],Math.abs(card[i]));
-  assert.ok(Math.abs(extents[0]-1.5)<.001);assert.ok(Math.abs(extents[1]-1)<.001);assert.ok(Math.abs(extents[2]-.09)<.001);
-  assert.equal(card.length,p.array.length);g.dispose();
+test("the shared note surface starts spherical and reaches the card bounds", async () => {
+  const { noteGeometry } = await load("src/lib/experience/geometry.ts");
+  const g = noteGeometry(3, 2),
+    p = g.attributes.position;
+  for (let i = 0; i < p.count; i++)
+    assert.ok(
+      Math.abs(Math.hypot(p.getX(i), p.getY(i), p.getZ(i)) - 0.85) < 0.00001,
+    );
+  const card = g.userData.card;
+  const extents = [0, 0, 0];
+  for (let i = 0; i < card.length; i++)
+    extents[i % 3] = Math.max(extents[i % 3], Math.abs(card[i]));
+  assert.ok(Math.abs(extents[0] - 1.5) < 0.001);
+  assert.ok(Math.abs(extents[1] - 1) < 0.001);
+  assert.ok(Math.abs(extents[2] - 0.09) < 0.001);
+  assert.equal(card.length, p.array.length);
+  g.dispose();
 });
 test("all project images, CV, original loader, Hero atmosphere and footer are preserved", () => {
   for (const [p, hash] of Object.entries({
@@ -82,8 +97,7 @@ test("scroll score is finite, continuous and independent of scroll direction", a
     const vh = mobile ? 844 : 900;
     let top = 0;
     const bounds = chapterIds.map((id, i) => {
-      const height =
-        vh * [1.45, 4.4, 2.5, 1.85, 2.3, 5.6, 3.3, 3.3, 1.3, 0.65][i];
+      const height = vh * [1.45, 4.4, 2.5, 1.85, 2.3, 5.6, 3.3, 3.3, 1.3, 1][i];
       const b = { id, top, height };
       top += height;
       return b;

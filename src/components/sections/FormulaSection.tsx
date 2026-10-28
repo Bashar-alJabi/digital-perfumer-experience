@@ -52,8 +52,7 @@ export default function FormulaSection() {
           <span>TOP + HEART + BASE</span>
           <h3>
             DIGITAL
-            <br />
-            <em>EXPERIENCE</em>
+            <br /> <em>EXPERIENCE</em>
           </h3>
         </div>
       </div>

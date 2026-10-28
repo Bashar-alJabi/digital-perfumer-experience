@@ -138,20 +138,16 @@ export function composeScore(
   ]);
   add(at("memory", 0), hidden, { stars: 1, dark: 1 });
   add(at("memory", 0.82), hidden);
-  add(
-    at("skills", 0),
-    [pose(0.67, 0.22, 0.2), pose(0.77, 0.2, 0.16), pose(0.86, 0.23, 0.13)],
-    { stars: 0.13 },
-  );
-  add(at("skills", 0.8), [
-    pose(0.67, 0.22, 0.2),
-    pose(0.77, 0.2, 0.16),
-    pose(0.86, 0.23, 0.13),
-  ]);
+  const skillNotes = mobile
+    ? [pose(0.73, 0.14, 0.1), pose(0.82, 0.14, 0.08), pose(0.9, 0.14, 0.06)]
+    : [pose(0.7, 0.31, 0.18), pose(0.78, 0.31, 0.14), pose(0.86, 0.31, 0.1)];
+  add(at("skills", 0), skillNotes, { stars: 0.13 });
+  add(at("skills", 0.8), skillNotes);
   add(at("contact", 0), hidden, { fluid: 1, signature: 1, stars: 0 });
   add(at("contact", 0.86), hidden);
+  add(b("signature").top - vh * 0.25, hidden);
   add(
-    b("signature").top - vh * 0.82,
+    b("signature").top,
     [pose(0.46, 0.45, 0.12), pose(0.5, 0.45, 0.12), pose(0.54, 0.45, 0.12)],
     { fluid: 0, signature: 0, dark: 0 },
   );
