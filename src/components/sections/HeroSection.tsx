@@ -1,6 +1,7 @@
 "use client";
 
 import OpeningWorld from "@/components/cinematic/OpeningWorld";
+import HeroCanvas from "@/components/canvas/HeroCanvas";
 import gsap from "gsap";
 import React, { useEffect, useRef } from "react";
 
@@ -69,6 +70,7 @@ export default function HeroSection() {
 			className="relative w-full h-screen flex flex-col justify-between items-center px-6 py-12 bg-perfume-bg text-perfume-text overflow-hidden select-none"
 		>
 			{/* 3D Fluid Canvas Background */}
+			<div className="opening-original-background"><HeroCanvas /></div>
 			<OpeningWorld />
 
 			{/* Spacer for vertical balance */}
