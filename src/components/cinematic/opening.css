@@ -58,3 +58,6 @@
 @media (prefers-reduced-motion:reduce){
   #philosophy .philosophy-connection{display:none}
 }
+
+/* Fixed thread coordinates are viewport-relative; avoid a perspective containing block. */
+#philosophy{perspective:none}
