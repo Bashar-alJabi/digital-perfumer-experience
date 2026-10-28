@@ -8,7 +8,6 @@ export default function PhilosophyStage(){
   const paths=useRef<(SVGPathElement|null)[]>([]);
   useEffect(()=>{
     const section=document.getElementById("philosophy");
-    const formula=document.getElementById("formula");
     if(!section)return;
     const cards=Array.from(section.querySelectorAll<HTMLElement>(".space-y-8 > div"));
     const heading=section.querySelector<HTMLElement>("h2");
@@ -33,6 +32,8 @@ export default function PhilosophyStage(){
         card.style.setProperty("--cn-card-appear",progress.toFixed(3));
         card.style.setProperty("--cn-card-focus",Math.max(0,focus).toFixed(3));
         card.style.setProperty("--cn-note-highlight",Math.max(0,focus*progress).toFixed(3));
+        const depth=(1-progress);
+        card.style.setProperty("--cn-depth",depth.toFixed(3));
         card.classList.toggle("cn-note-illuminated",focus>.45&&progress>.6);
         // The first note arrives, then the heart, then the base.
         return progress;
@@ -45,12 +46,7 @@ export default function PhilosophyStage(){
         heading.style.opacity=String(Math.max(.15,entered));
       }
       // A line only draws after its destination note is introduced.
-      const formulaRect=formula?.getBoundingClientRect();
-      const formulaAnchor=formulaRect?{
-        x:sectionRect.width*.52,
-        y:formulaRect.top-sectionRect.top+Math.min(formulaRect.height*.12,100),
-      }:null;
-      const targets=[anchors[1],anchors[2],formulaAnchor];
+      const targets=[anchors[1],anchors[2]];
       paths.current.forEach((path,i)=>{
         const from=anchors[i]??anchors[2],to=targets[i];
         if(!path||!from||!to)return;
@@ -58,11 +54,10 @@ export default function PhilosophyStage(){
         const bend=Math.min(90,Math.abs(to.y-from.y)*.19);
         path.setAttribute("d",`M ${from.x} ${from.y} C ${from.x+sign*bend} ${from.y+(to.y-from.y)*.36}, ${to.x+sign*bend} ${from.y+(to.y-from.y)*.68}, ${to.x} ${to.y}`);
         const length=path.getTotalLength();
-        const amount=i<2?ease((cardReveals[i+1]-.26)/.65)
-          :formulaRect?ease((height*.77-formulaRect.top)/(height*.48)):0;
+        const amount=ease((cardReveals[i+1]-.2)/.75);
         path.style.strokeDasharray=String(length);
         path.style.strokeDashoffset=String(length*(1-amount));
-        path.style.opacity=String(reduced.matches?0:i===2?.6:.82);
+        path.style.opacity=String(reduced.matches?0:.72);
       });
     };
     const tick=()=>{if(!frame)frame=requestAnimationFrame(update)};
@@ -73,13 +68,12 @@ export default function PhilosophyStage(){
       cancelAnimationFrame(frame);
       window.removeEventListener("scroll",tick);window.removeEventListener("resize",tick);
       heading?.style.removeProperty("transform");heading?.style.removeProperty("opacity");
-      cards.forEach(card=>{card.style.removeProperty("--cn-card-appear");card.style.removeProperty("--cn-card-focus");card.style.removeProperty("--cn-note-highlight");card.classList.remove("cn-note-illuminated")});
+      cards.forEach(card=>{card.style.removeProperty("--cn-card-appear");card.style.removeProperty("--cn-card-focus");card.style.removeProperty("--cn-note-highlight");card.style.removeProperty("--cn-depth");card.classList.remove("cn-note-illuminated")});
       section.style.removeProperty("--philosophy-progress");
     };
   },[]);
   return <svg className="philosophy-connection" aria-hidden="true" focusable="false">
     <path ref={e=>{paths.current[0]=e}} stroke="#f36371"/>
     <path ref={e=>{paths.current[1]=e}} stroke="#ffc3d3"/>
-    <path ref={e=>{paths.current[2]=e}} stroke="#262029"/>
   </svg>;
 }
