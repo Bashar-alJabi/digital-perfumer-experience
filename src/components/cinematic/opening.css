@@ -125,3 +125,119 @@
     transform-origin:40% 45%;
   }
 }
+
+/* V3 philosophy stage: one 3D note physically unfolds into its content plane.
+ * These rules intentionally override the older paragraph-only animations. */
+@media(min-width:768px) and (prefers-reduced-motion:no-preference){
+  #philosophy{
+    height:390vh!important;
+    min-height:390vh;
+    padding:0!important;
+    margin-top:-15vh;
+    isolation:isolate;
+    perspective:none!important;
+  }
+  #philosophy .philosophy-inner{
+    position:sticky;top:0;height:100vh;max-width:1400px;
+    display:flex;align-items:center;padding:7vh 4vw;
+  }
+  #philosophy .philosophy-inner>.grid{
+    width:100%;height:100%;align-items:center;
+    grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);
+    gap:min(9vw,125px);
+  }
+  #philosophy .philosophy-manifesto{
+    position:relative;top:auto;
+    transform-origin:45% 48%;
+    transform:perspective(1450px) translate3d(calc(var(--manifesto-depth,0) * -65px),calc(var(--manifesto-depth,0) * 40px),calc(var(--manifesto-depth,0) * -250px)) rotateY(calc(var(--manifesto-depth,0) * 15deg))!important;
+    opacity:clamp(.25,calc(1 - var(--manifesto-depth,0) * .82),1)!important;
+    filter:blur(calc(var(--manifesto-depth,0) * 2.5px));
+    will-change:transform,opacity;
+  }
+  #philosophy .philosophy-notes{
+    position:relative;display:grid;place-items:center;
+    height:min(71vh,680px);min-height:450px;
+    perspective:1450px;
+  }
+  #philosophy .note-morph-card{
+    --note-unfold:0;--note-text:0;--note-sphere:1;
+    position:absolute!important;
+    inset:auto!important;
+    width:min(100%,570px);min-height:380px;
+    padding:clamp(28px,3.1vw,50px)!important;
+    margin:0!important;
+    border:1px solid rgba(243,99,113,.25);
+    border-radius:calc((1 - var(--note-unfold)) * 48% + var(--note-unfold) * 24px)!important;
+    background:transparent!important;
+    overflow:hidden;isolation:isolate;
+    transform-origin:50% 50%!important;
+    transform:perspective(1350px)
+      translate3d(0,calc((1 - var(--note-unfold)) * 18px),calc((1 - var(--note-unfold)) * 135px))
+      rotateY(calc((1 - var(--note-unfold)) * -22deg))
+      scale(calc(.13 + var(--note-unfold) * .87))!important;
+    opacity:1!important;
+    filter:none!important;
+    box-shadow:0 35px 90px rgba(87,33,60,.12),inset 0 2px 4px rgba(255,255,255,.55)!important;
+    transition:none!important;
+    will-change:transform,border-radius;
+    pointer-events:none;
+  }
+  #philosophy .note-morph-card[data-note-active="true"]{pointer-events:auto}
+  #philosophy .note-morph-card::before{
+    content:"";position:absolute;inset:0;z-index:-1;opacity:1;
+    background:var(--note-color);
+  }
+  #philosophy .note-morph-card:nth-child(1){
+    --note-color:radial-gradient(ellipse at 29% 18%,#ffe0e7 0%,#f9a7b5 40%,#ed7186 100%);
+    --note-ink:#311b25;
+  }
+  #philosophy .note-morph-card:nth-child(2){
+    --note-color:radial-gradient(ellipse at 27% 14%,#fffafd 0%,#ffe1e8 49%,#f7b9ce 100%);
+    --note-ink:#2a2025;
+  }
+  #philosophy .note-morph-card:nth-child(3){
+    --note-color:radial-gradient(ellipse at 25% 15%,#705760 0%,#35262e 58%,#17161c 100%);
+    --note-ink:#fff2f5;
+  }
+  #philosophy .note-morph-card .note-morph-content{
+    transform:perspective(900px) translate3d(0,calc((1 - var(--note-text)) * 34px),calc((1 - var(--note-text)) * -65px)) rotateX(calc((1 - var(--note-text)) * 11deg))!important;
+    opacity:clamp(0,calc(var(--note-text) * 1.3),1)!important;
+    filter:blur(calc((1 - var(--note-text)) * 4px));
+    color:var(--note-ink);
+    transition:none!important;
+  }
+  #philosophy .note-morph-card .note-morph-content :is(h3,p){
+    color:var(--note-ink)!important;
+    text-shadow:none!important;
+  }
+  #philosophy .note-morph-card .note-morph-content .dp-small{
+    opacity:.78;
+  }
+  #philosophy .note-morph-card .note-morph-number{
+    opacity:calc(var(--note-text) * .22);
+    color:var(--note-ink)!important;
+  }
+  #philosophy .note-morph-card .note-morph-dots{
+    opacity:var(--note-text);
+  }
+  #philosophy .philosophy-connection{display:none!important}
+}
+@media(max-width:767px){
+  #philosophy .philosophy-connection{display:none!important}
+  #philosophy .note-morph-card{
+    transform:none!important;opacity:1!important;
+    background:var(--note-color,#fff6f8)!important;
+    border-radius:24px!important;
+  }
+  #philosophy .note-morph-card:nth-child(1){--note-color:#f9b7c3}
+  #philosophy .note-morph-card:nth-child(2){--note-color:#ffe2e9}
+  #philosophy .note-morph-card:nth-child(3){--note-color:#302630}
+  #philosophy .note-morph-card:nth-child(3) :is(h3,p){color:#fff2f5!important}
+  #philosophy .note-morph-card .note-morph-content{transform:none!important;opacity:1!important;filter:none!important}
+}
+@media(prefers-reduced-motion:reduce){
+  #philosophy .philosophy-connection{display:none!important}
+  #philosophy .note-morph-card{transform:none!important;opacity:1!important;background:var(--note-color,#fff6f8)!important}
+  #philosophy .note-morph-card .note-morph-content{transform:none!important;opacity:1!important;filter:none!important}
+  #philosophy .philosophy-manifesto{transform:none!important;opacity:1!important;filter:none!important}
+}
